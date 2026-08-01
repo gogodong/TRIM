@@ -1,0 +1,2642 @@
+schema_version: acs_public_coverage_generalization_tree.v1
+generated_at: '2026-06-19T07:41:12Z'
+dataset:
+  name: acs_public_coverage
+  qi_attributes:
+  - AGEP
+  - SCHL
+  - MAR
+  - SEX
+  - DIS
+  - ESP
+  - CIT
+  - MIG
+  - MIL
+  - ANC
+  - NATIVITY
+  - DEAR
+  - DEYE
+  - DREM
+  - PINCP
+  - ESR
+  - ST
+  - FER
+  - RAC1P
+  source_reference:
+    name: 2014 ACS PUMS Data Dictionary
+    publisher: U.S. Census Bureau
+    url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+    text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+    documentation_page: https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+audit_policy:
+  leaf_domain: Only values observed in the QI value-domain export are included as leaves.
+  required_checks:
+  - coverage
+  - parent_link_consistency
+  - sibling_disjointness
+  coverage_expectation: Each observed value appears as exactly one leaf in its attribute tree.
+  continuous_coverage: For a continuous attribute, expand the exported observed_values_compressed `lo ~ hi` range into its
+    integer set and verify that every integer falls in exactly one leaf interval; adjacent sibling intervals must be disjoint.
+attribute_observed_domains:
+  AGEP:
+    attribute_type: continuous
+    observed_count: 50
+    observed_values_compressed: 15 ~ 64
+  SCHL:
+    attribute_type: code
+    observed_count: 24
+    observed_values:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+  MAR:
+    attribute_type: code
+    observed_count: 5
+    observed_values:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+  SEX:
+    attribute_type: code
+    observed_count: 2
+    observed_values:
+    - 1
+    - 2
+  DIS:
+    attribute_type: code
+    observed_count: 2
+    observed_values:
+    - 1
+    - 2
+  ESP:
+    attribute_type: code
+    observed_count: 9
+    observed_values:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+  CIT:
+    attribute_type: code
+    observed_count: 5
+    observed_values:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+  MIG:
+    attribute_type: code
+    observed_count: 3
+    observed_values:
+    - 1
+    - 2
+    - 3
+  MIL:
+    attribute_type: code
+    observed_count: 5
+    observed_values:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+  ANC:
+    attribute_type: code
+    observed_count: 4
+    observed_values:
+    - 1
+    - 2
+    - 3
+    - 4
+  NATIVITY:
+    attribute_type: code
+    observed_count: 2
+    observed_values:
+    - 1
+    - 2
+  DEAR:
+    attribute_type: code
+    observed_count: 2
+    observed_values:
+    - 1
+    - 2
+  DEYE:
+    attribute_type: code
+    observed_count: 2
+    observed_values:
+    - 1
+    - 2
+  DREM:
+    attribute_type: code
+    observed_count: 2
+    observed_values:
+    - 1
+    - 2
+  PINCP:
+    attribute_type: continuous
+    observed_count: 1473
+    observed_values_compressed: -10700 ~ 30000
+  ESR:
+    attribute_type: code
+    observed_count: 7
+    observed_values:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+  ST:
+    attribute_type: code
+    observed_count: 1
+    observed_values:
+    - 6
+  FER:
+    attribute_type: code
+    observed_count: 3
+    observed_values:
+    - 0
+    - 1
+    - 2
+  RAC1P:
+    attribute_type: code
+    observed_count: 9
+    observed_values:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+trees:
+  AGEP:
+    attribute: AGEP
+    attribute_type: continuous
+    root: AGEP.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      rule: Use life-stage age bands within the exported 15 through 64 range.
+    notes: &id002
+    - Leaves are restricted to the exported continuous range and represented as closed inclusive integer intervals.
+    - Coverage checks expand the compressed range into every integer in the interval.
+    nodes:
+    - id: AGEP.ANY
+      kind: root
+      label: Any observed age 15 through 64
+      parent: null
+      leaf_count: 50
+      leaf_values_compressed: 15 ~ 17, 18 ~ 24, 25 ~ 34, 35 ~ 44, 45 ~ 54, 55 ~ 64
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - AGEP.adolescent
+      - AGEP.young_adult
+      - AGEP.prime_working_age
+      - AGEP.late_working_age
+    - id: AGEP.adolescent
+      kind: internal
+      label: Adolescents
+      parent: AGEP.ANY
+      leaf_count: 3
+      leaf_values_compressed: 15 ~ 17
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Ages below 18 are separated from adult coverage groups.
+      children:
+      - AGEP.value_15_to_17
+    - id: AGEP.value_15_to_17
+      kind: leaf
+      label: Ages 15 through 17
+      parent: AGEP.adolescent
+      leaf_count: 3
+      leaf_values_compressed: 15 ~ 17
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 15 ~ 17
+    - id: AGEP.young_adult
+      kind: internal
+      label: Young adults
+      parent: AGEP.ANY
+      leaf_count: 7
+      leaf_values_compressed: 18 ~ 24
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Early adult ages are grouped separately for coverage and labor-market utility.
+      children:
+      - AGEP.value_18_to_24
+    - id: AGEP.value_18_to_24
+      kind: leaf
+      label: Ages 18 through 24
+      parent: AGEP.young_adult
+      leaf_count: 7
+      leaf_values_compressed: 18 ~ 24
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 18 ~ 24
+    - id: AGEP.prime_working_age
+      kind: internal
+      label: Prime working-age adults
+      parent: AGEP.ANY
+      leaf_count: 20
+      leaf_values_compressed: 25 ~ 34, 35 ~ 44
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Adult working-age decades are grouped into stable utility-preserving bands.
+      children:
+      - AGEP.value_25_to_34
+      - AGEP.value_35_to_44
+    - id: AGEP.value_25_to_34
+      kind: leaf
+      label: Ages 25 through 34
+      parent: AGEP.prime_working_age
+      leaf_count: 10
+      leaf_values_compressed: 25 ~ 34
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 25 ~ 34
+    - id: AGEP.value_35_to_44
+      kind: leaf
+      label: Ages 35 through 44
+      parent: AGEP.prime_working_age
+      leaf_count: 10
+      leaf_values_compressed: 35 ~ 44
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 35 ~ 44
+    - id: AGEP.late_working_age
+      kind: internal
+      label: Late working-age adults
+      parent: AGEP.ANY
+      leaf_count: 20
+      leaf_values_compressed: 45 ~ 54, 55 ~ 64
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Older working-age adults are separated from younger adults.
+      children:
+      - AGEP.value_45_to_54
+      - AGEP.value_55_to_64
+    - id: AGEP.value_45_to_54
+      kind: leaf
+      label: Ages 45 through 54
+      parent: AGEP.late_working_age
+      leaf_count: 10
+      leaf_values_compressed: 45 ~ 54
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 45 ~ 54
+    - id: AGEP.value_55_to_64
+      kind: leaf
+      label: Ages 55 through 64
+      parent: AGEP.late_working_age
+      leaf_count: 10
+      leaf_values_compressed: 55 ~ 64
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 55 ~ 64
+  SCHL:
+    attribute: SCHL
+    attribute_type: code
+    root: SCHL.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: No schooling completed
+        2: Nursery school, preschool
+        3: Kindergarten
+        4: Grade 1
+        5: Grade 2
+        6: Grade 3
+        7: Grade 4
+        8: Grade 5
+        9: Grade 6
+        10: Grade 7
+        11: Grade 8
+        12: Grade 9
+        13: Grade 10
+        14: Grade 11
+        15: 12th grade - no diploma
+        16: Regular high school diploma
+        17: GED or alternative credential
+        18: Some college, but less than 1 year
+        19: 1 or more years of college credit, no degree
+        20: Associate's degree
+        21: Bachelor's degree
+        22: Master's degree
+        23: Professional degree beyond a bachelor's degree
+        24: Doctorate degree
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes: &id001
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    nodes:
+    - id: SCHL.ANY
+      kind: root
+      label: Any observed educational attainment code
+      parent: null
+      leaf_count: 24
+      leaf_values_compressed: 1-24
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - SCHL.no_school_pre_grade
+      - SCHL.primary_grades_1_8
+      - SCHL.secondary_no_diploma
+      - SCHL.high_school_credential
+      - SCHL.some_college_associate
+      - SCHL.bachelors
+      - SCHL.graduate_professional
+    - id: SCHL.no_school_pre_grade
+      kind: internal
+      label: No completed school or pre-grade schooling
+      parent: SCHL.ANY
+      leaf_count: 3
+      leaf_values_compressed: 1-3
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes identify no schooling, nursery school, and kindergarten.
+      children:
+      - SCHL.value_1
+      - SCHL.value_2
+      - SCHL.value_3
+    - id: SCHL.value_1
+      kind: leaf
+      label: No schooling completed
+      parent: SCHL.no_school_pre_grade
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: SCHL.value_2
+      kind: leaf
+      label: Nursery school, preschool
+      parent: SCHL.no_school_pre_grade
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 2
+    - id: SCHL.value_3
+      kind: leaf
+      label: Kindergarten
+      parent: SCHL.no_school_pre_grade
+      leaf_count: 1
+      leaf_values_compressed: '3'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 3
+    - id: SCHL.primary_grades_1_8
+      kind: internal
+      label: Primary and middle grades 1 through 8
+      parent: SCHL.ANY
+      leaf_count: 8
+      leaf_values_compressed: 4-11
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official grade-level codes 4 through 11 cover grades 1 through 8.
+      children:
+      - SCHL.value_4
+      - SCHL.value_5
+      - SCHL.value_6
+      - SCHL.value_7
+      - SCHL.value_8
+      - SCHL.value_9
+      - SCHL.value_10
+      - SCHL.value_11
+    - id: SCHL.value_4
+      kind: leaf
+      label: Grade 1
+      parent: SCHL.primary_grades_1_8
+      leaf_count: 1
+      leaf_values_compressed: '4'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 4
+    - id: SCHL.value_5
+      kind: leaf
+      label: Grade 2
+      parent: SCHL.primary_grades_1_8
+      leaf_count: 1
+      leaf_values_compressed: '5'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 5
+    - id: SCHL.value_6
+      kind: leaf
+      label: Grade 3
+      parent: SCHL.primary_grades_1_8
+      leaf_count: 1
+      leaf_values_compressed: '6'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 6
+    - id: SCHL.value_7
+      kind: leaf
+      label: Grade 4
+      parent: SCHL.primary_grades_1_8
+      leaf_count: 1
+      leaf_values_compressed: '7'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 7
+    - id: SCHL.value_8
+      kind: leaf
+      label: Grade 5
+      parent: SCHL.primary_grades_1_8
+      leaf_count: 1
+      leaf_values_compressed: '8'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 8
+    - id: SCHL.value_9
+      kind: leaf
+      label: Grade 6
+      parent: SCHL.primary_grades_1_8
+      leaf_count: 1
+      leaf_values_compressed: '9'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 9
+    - id: SCHL.value_10
+      kind: leaf
+      label: Grade 7
+      parent: SCHL.primary_grades_1_8
+      leaf_count: 1
+      leaf_values_compressed: '10'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 10
+    - id: SCHL.value_11
+      kind: leaf
+      label: Grade 8
+      parent: SCHL.primary_grades_1_8
+      leaf_count: 1
+      leaf_values_compressed: '11'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 11
+    - id: SCHL.secondary_no_diploma
+      kind: internal
+      label: Secondary grades without diploma
+      parent: SCHL.ANY
+      leaf_count: 4
+      leaf_values_compressed: 12-15
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 12 through 15 cover grades 9 through 12 without a diploma.
+      children:
+      - SCHL.value_12
+      - SCHL.value_13
+      - SCHL.value_14
+      - SCHL.value_15
+    - id: SCHL.value_12
+      kind: leaf
+      label: Grade 9
+      parent: SCHL.secondary_no_diploma
+      leaf_count: 1
+      leaf_values_compressed: '12'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 12
+    - id: SCHL.value_13
+      kind: leaf
+      label: Grade 10
+      parent: SCHL.secondary_no_diploma
+      leaf_count: 1
+      leaf_values_compressed: '13'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 13
+    - id: SCHL.value_14
+      kind: leaf
+      label: Grade 11
+      parent: SCHL.secondary_no_diploma
+      leaf_count: 1
+      leaf_values_compressed: '14'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 14
+    - id: SCHL.value_15
+      kind: leaf
+      label: 12th grade - no diploma
+      parent: SCHL.secondary_no_diploma
+      leaf_count: 1
+      leaf_values_compressed: '15'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 15
+    - id: SCHL.high_school_credential
+      kind: internal
+      label: High-school diploma or equivalent
+      parent: SCHL.ANY
+      leaf_count: 2
+      leaf_values_compressed: 16-17
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 16 and 17 are high-school completion credentials.
+      children:
+      - SCHL.value_16
+      - SCHL.value_17
+    - id: SCHL.value_16
+      kind: leaf
+      label: Regular high school diploma
+      parent: SCHL.high_school_credential
+      leaf_count: 1
+      leaf_values_compressed: '16'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 16
+    - id: SCHL.value_17
+      kind: leaf
+      label: GED or alternative credential
+      parent: SCHL.high_school_credential
+      leaf_count: 1
+      leaf_values_compressed: '17'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 17
+    - id: SCHL.some_college_associate
+      kind: internal
+      label: Some college or associate degree
+      parent: SCHL.ANY
+      leaf_count: 3
+      leaf_values_compressed: 18-20
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 18 through 20 identify postsecondary study below a bachelor degree.
+      children:
+      - SCHL.value_18
+      - SCHL.value_19
+      - SCHL.value_20
+    - id: SCHL.value_18
+      kind: leaf
+      label: Some college, but less than 1 year
+      parent: SCHL.some_college_associate
+      leaf_count: 1
+      leaf_values_compressed: '18'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 18
+    - id: SCHL.value_19
+      kind: leaf
+      label: 1 or more years of college credit, no degree
+      parent: SCHL.some_college_associate
+      leaf_count: 1
+      leaf_values_compressed: '19'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 19
+    - id: SCHL.value_20
+      kind: leaf
+      label: Associate's degree
+      parent: SCHL.some_college_associate
+      leaf_count: 1
+      leaf_values_compressed: '20'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 20
+    - id: SCHL.bachelors
+      kind: internal
+      label: Bachelor's degree
+      parent: SCHL.ANY
+      leaf_count: 1
+      leaf_values_compressed: '21'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official code 21 is a completed bachelor degree.
+      children:
+      - SCHL.value_21
+    - id: SCHL.value_21
+      kind: leaf
+      label: Bachelor's degree
+      parent: SCHL.bachelors
+      leaf_count: 1
+      leaf_values_compressed: '21'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 21
+    - id: SCHL.graduate_professional
+      kind: internal
+      label: Graduate or professional degree
+      parent: SCHL.ANY
+      leaf_count: 3
+      leaf_values_compressed: 22-24
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 22 through 24 identify education beyond a bachelor degree.
+      children:
+      - SCHL.value_22
+      - SCHL.value_23
+      - SCHL.value_24
+    - id: SCHL.value_22
+      kind: leaf
+      label: Master's degree
+      parent: SCHL.graduate_professional
+      leaf_count: 1
+      leaf_values_compressed: '22'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 22
+    - id: SCHL.value_23
+      kind: leaf
+      label: Professional degree beyond a bachelor's degree
+      parent: SCHL.graduate_professional
+      leaf_count: 1
+      leaf_values_compressed: '23'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 23
+    - id: SCHL.value_24
+      kind: leaf
+      label: Doctorate degree
+      parent: SCHL.graduate_professional
+      leaf_count: 1
+      leaf_values_compressed: '24'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 24
+  MAR:
+    attribute: MAR
+    attribute_type: code
+    root: MAR.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: Married
+        2: Widowed
+        3: Divorced
+        4: Separated
+        5: Never married or under 15 years old
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes: *id001
+    nodes:
+    - id: MAR.ANY
+      kind: root
+      label: Any observed marital status code
+      parent: null
+      leaf_count: 5
+      leaf_values_compressed: 1-5
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - MAR.currently_married
+      - MAR.formerly_married
+      - MAR.never_married_or_under_15
+    - id: MAR.currently_married
+      kind: internal
+      label: Currently married
+      parent: MAR.ANY
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official code 1 is married.
+      children:
+      - MAR.value_1
+    - id: MAR.value_1
+      kind: leaf
+      label: Married
+      parent: MAR.currently_married
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: MAR.formerly_married
+      kind: internal
+      label: Formerly married
+      parent: MAR.ANY
+      leaf_count: 3
+      leaf_values_compressed: 2-4
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 2 through 4 are widowed, divorced, or separated.
+      children:
+      - MAR.value_2
+      - MAR.value_3
+      - MAR.value_4
+    - id: MAR.value_2
+      kind: leaf
+      label: Widowed
+      parent: MAR.formerly_married
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 2
+    - id: MAR.value_3
+      kind: leaf
+      label: Divorced
+      parent: MAR.formerly_married
+      leaf_count: 1
+      leaf_values_compressed: '3'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 3
+    - id: MAR.value_4
+      kind: leaf
+      label: Separated
+      parent: MAR.formerly_married
+      leaf_count: 1
+      leaf_values_compressed: '4'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 4
+    - id: MAR.never_married_or_under_15
+      kind: internal
+      label: Never married or under 15
+      parent: MAR.ANY
+      leaf_count: 1
+      leaf_values_compressed: '5'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official code 5 combines never married and under age 15.
+      children:
+      - MAR.value_5
+    - id: MAR.value_5
+      kind: leaf
+      label: Never married or under 15 years old
+      parent: MAR.never_married_or_under_15
+      leaf_count: 1
+      leaf_values_compressed: '5'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 5
+  SEX:
+    attribute: SEX
+    attribute_type: code
+    root: SEX.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: Male
+        2: Female
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes:
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    - Binary attribute uses a root with two leaf children.
+    nodes:
+    - id: SEX.ANY
+      kind: root
+      label: Any observed sex code
+      parent: null
+      leaf_count: 2
+      leaf_values_compressed: 1-2
+      depth_from_root: 0
+      height_from_leaf: 1
+      children:
+      - SEX.value_1
+      - SEX.value_2
+    - id: SEX.value_1
+      kind: leaf
+      label: Male
+      parent: SEX.ANY
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: SEX.value_2
+      kind: leaf
+      label: Female
+      parent: SEX.ANY
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 2
+  DIS:
+    attribute: DIS
+    attribute_type: code
+    root: DIS.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: With a disability
+        2: Without a disability
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes:
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    - Binary attribute uses a root with two leaf children.
+    nodes:
+    - id: DIS.ANY
+      kind: root
+      label: Any observed disability-recode value
+      parent: null
+      leaf_count: 2
+      leaf_values_compressed: 1-2
+      depth_from_root: 0
+      height_from_leaf: 1
+      children:
+      - DIS.value_1
+      - DIS.value_2
+    - id: DIS.value_1
+      kind: leaf
+      label: With a disability
+      parent: DIS.ANY
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: DIS.value_2
+      kind: leaf
+      label: Without a disability
+      parent: DIS.ANY
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 2
+  ESP:
+    attribute: ESP
+    attribute_type: code
+    root: ESP.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        0: 'Folktables numeric 0 for Census blank/b N/A: not own child of householder, and not child in subfamily'
+        1: 'Living with two parents: both parents in labor force'
+        2: 'Living with two parents: father only in labor force'
+        3: 'Living with two parents: mother only in labor force'
+        4: 'Living with two parents: neither parent in labor force'
+        5: 'Living with father only: father in the labor force'
+        6: 'Living with father only: father not in labor force'
+        7: 'Living with mother only: mother in the labor force'
+        8: 'Living with mother only: mother not in labor force'
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes:
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    - Observed value 0 is a Folktables numeric encoding of the Census blank/b N/A category for this attribute and is retained
+      as its own semantic leaf.
+    nodes:
+    - id: ESP.ANY
+      kind: root
+      label: Any observed parental employment-status code
+      parent: null
+      leaf_count: 9
+      leaf_values_compressed: 0-8
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - ESP.exported_na
+      - ESP.two_parents
+      - ESP.father_only
+      - ESP.mother_only
+    - id: ESP.exported_na
+      kind: internal
+      label: Not applicable parental employment status
+      parent: ESP.ANY
+      leaf_count: 1
+      leaf_values_compressed: '0'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Observed value 0 encodes the Census blank/b N/A category.
+      children:
+      - ESP.value_0
+    - id: ESP.value_0
+      kind: leaf
+      label: 'Folktables numeric 0 for Census blank/b N/A: not own child of householder, and not child in subfamily'
+      parent: ESP.exported_na
+      leaf_count: 1
+      leaf_values_compressed: '0'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 0
+    - id: ESP.two_parents
+      kind: internal
+      label: Living with two parents
+      parent: ESP.ANY
+      leaf_count: 4
+      leaf_values_compressed: 1-4
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 1 through 4 describe labor-force combinations for two parents.
+      children:
+      - ESP.value_1
+      - ESP.value_2
+      - ESP.value_3
+      - ESP.value_4
+    - id: ESP.value_1
+      kind: leaf
+      label: 'Living with two parents: both parents in labor force'
+      parent: ESP.two_parents
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: ESP.value_2
+      kind: leaf
+      label: 'Living with two parents: father only in labor force'
+      parent: ESP.two_parents
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 2
+    - id: ESP.value_3
+      kind: leaf
+      label: 'Living with two parents: mother only in labor force'
+      parent: ESP.two_parents
+      leaf_count: 1
+      leaf_values_compressed: '3'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 3
+    - id: ESP.value_4
+      kind: leaf
+      label: 'Living with two parents: neither parent in labor force'
+      parent: ESP.two_parents
+      leaf_count: 1
+      leaf_values_compressed: '4'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 4
+    - id: ESP.father_only
+      kind: internal
+      label: Living with father only
+      parent: ESP.ANY
+      leaf_count: 2
+      leaf_values_compressed: 5-6
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 5 and 6 describe father-only labor-force status.
+      children:
+      - ESP.value_5
+      - ESP.value_6
+    - id: ESP.value_5
+      kind: leaf
+      label: 'Living with father only: father in the labor force'
+      parent: ESP.father_only
+      leaf_count: 1
+      leaf_values_compressed: '5'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 5
+    - id: ESP.value_6
+      kind: leaf
+      label: 'Living with father only: father not in labor force'
+      parent: ESP.father_only
+      leaf_count: 1
+      leaf_values_compressed: '6'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 6
+    - id: ESP.mother_only
+      kind: internal
+      label: Living with mother only
+      parent: ESP.ANY
+      leaf_count: 2
+      leaf_values_compressed: 7-8
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 7 and 8 describe mother-only labor-force status.
+      children:
+      - ESP.value_7
+      - ESP.value_8
+    - id: ESP.value_7
+      kind: leaf
+      label: 'Living with mother only: mother in the labor force'
+      parent: ESP.mother_only
+      leaf_count: 1
+      leaf_values_compressed: '7'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 7
+    - id: ESP.value_8
+      kind: leaf
+      label: 'Living with mother only: mother not in labor force'
+      parent: ESP.mother_only
+      leaf_count: 1
+      leaf_values_compressed: '8'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 8
+  CIT:
+    attribute: CIT
+    attribute_type: code
+    root: CIT.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: Born in the U.S.
+        2: Born in Puerto Rico, Guam, the U.S. Virgin Islands, or the Northern Marianas
+        3: Born abroad of American parent(s)
+        4: U.S. citizen by naturalization
+        5: Not a citizen of the U.S.
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes: *id001
+    nodes:
+    - id: CIT.ANY
+      kind: root
+      label: Any observed citizenship-status code
+      parent: null
+      leaf_count: 5
+      leaf_values_compressed: 1-5
+      depth_from_root: 0
+      height_from_leaf: 3
+      children:
+      - CIT.citizen
+      - CIT.not_citizen
+    - id: CIT.citizen
+      kind: internal
+      label: U.S. citizen
+      parent: CIT.ANY
+      leaf_count: 4
+      leaf_values_compressed: 1-4
+      depth_from_root: 1
+      height_from_leaf: 2
+      rationale: Official codes 1 through 4 identify citizens by birth, parentage, or naturalization.
+      children:
+      - CIT.citizen_at_birth
+      - CIT.naturalized_citizen
+    - id: CIT.citizen_at_birth
+      kind: internal
+      label: Citizen at birth
+      parent: CIT.citizen
+      leaf_count: 3
+      leaf_values_compressed: 1-3
+      depth_from_root: 2
+      height_from_leaf: 1
+      rationale: Official codes 1 through 3 are birth or parentage citizenship categories.
+      children:
+      - CIT.value_1
+      - CIT.value_2
+      - CIT.value_3
+    - id: CIT.value_1
+      kind: leaf
+      label: Born in the U.S.
+      parent: CIT.citizen_at_birth
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: CIT.value_2
+      kind: leaf
+      label: Born in Puerto Rico, Guam, the U.S. Virgin Islands, or the Northern Marianas
+      parent: CIT.citizen_at_birth
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 2
+    - id: CIT.value_3
+      kind: leaf
+      label: Born abroad of American parent(s)
+      parent: CIT.citizen_at_birth
+      leaf_count: 1
+      leaf_values_compressed: '3'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 3
+    - id: CIT.naturalized_citizen
+      kind: internal
+      label: Naturalized citizen
+      parent: CIT.citizen
+      leaf_count: 1
+      leaf_values_compressed: '4'
+      depth_from_root: 2
+      height_from_leaf: 1
+      rationale: Official code 4 is citizen by naturalization.
+      children:
+      - CIT.value_4
+    - id: CIT.value_4
+      kind: leaf
+      label: U.S. citizen by naturalization
+      parent: CIT.naturalized_citizen
+      leaf_count: 1
+      leaf_values_compressed: '4'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 4
+    - id: CIT.not_citizen
+      kind: internal
+      label: Not a U.S. citizen
+      parent: CIT.ANY
+      leaf_count: 1
+      leaf_values_compressed: '5'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official code 5 is not a citizen of the U.S.
+      children:
+      - CIT.value_5
+    - id: CIT.value_5
+      kind: leaf
+      label: Not a citizen of the U.S.
+      parent: CIT.not_citizen
+      leaf_count: 1
+      leaf_values_compressed: '5'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 5
+  MIG:
+    attribute: MIG
+    attribute_type: code
+    root: MIG.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: Yes, same house (nonmovers)
+        2: No, outside US and Puerto Rico
+        3: No, different house in US or Puerto Rico
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes: *id001
+    nodes:
+    - id: MIG.ANY
+      kind: root
+      label: Any observed mobility-status code
+      parent: null
+      leaf_count: 3
+      leaf_values_compressed: 1-3
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - MIG.nonmover
+      - MIG.mover
+    - id: MIG.nonmover
+      kind: internal
+      label: 'Nonmover: same house'
+      parent: MIG.ANY
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official code 1 indicates same house one year ago.
+      children:
+      - MIG.value_1
+    - id: MIG.value_1
+      kind: leaf
+      label: Yes, same house (nonmovers)
+      parent: MIG.nonmover
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: MIG.mover
+      kind: internal
+      label: Moved within last year
+      parent: MIG.ANY
+      leaf_count: 2
+      leaf_values_compressed: 2-3
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 2 and 3 indicate a different residence one year ago.
+      children:
+      - MIG.value_2
+      - MIG.value_3
+    - id: MIG.value_2
+      kind: leaf
+      label: No, outside US and Puerto Rico
+      parent: MIG.mover
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 2
+    - id: MIG.value_3
+      kind: leaf
+      label: No, different house in US or Puerto Rico
+      parent: MIG.mover
+      leaf_count: 1
+      leaf_values_compressed: '3'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 3
+  MIL:
+    attribute: MIL
+    attribute_type: code
+    root: MIL.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        0: 'Folktables numeric 0 for Census blank/b N/A: less than 17 years old'
+        1: Now on active duty
+        2: On active duty in the past, but not now
+        3: Only on active duty for training in Reserves/National Guard
+        4: Never served in the military
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes:
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    - Observed value 0 is a Folktables numeric encoding of the Census blank/b N/A category for this attribute and is retained
+      as its own semantic leaf.
+    nodes:
+    - id: MIL.ANY
+      kind: root
+      label: Any observed military-service code
+      parent: null
+      leaf_count: 5
+      leaf_values_compressed: 0-4
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - MIL.exported_na
+      - MIL.served_or_training
+      - MIL.never_served
+    - id: MIL.exported_na
+      kind: internal
+      label: Not applicable military-service status
+      parent: MIL.ANY
+      leaf_count: 1
+      leaf_values_compressed: '0'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Observed value 0 encodes the Census blank/b N/A category for people less than 17 years old.
+      children:
+      - MIL.value_0
+    - id: MIL.value_0
+      kind: leaf
+      label: 'Folktables numeric 0 for Census blank/b N/A: less than 17 years old'
+      parent: MIL.exported_na
+      leaf_count: 1
+      leaf_values_compressed: '0'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 0
+    - id: MIL.served_or_training
+      kind: internal
+      label: Military service or reserve training experience
+      parent: MIL.ANY
+      leaf_count: 3
+      leaf_values_compressed: 1-3
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 1 through 3 indicate current service, past service, or reserve/National Guard training.
+      children:
+      - MIL.value_1
+      - MIL.value_2
+      - MIL.value_3
+    - id: MIL.value_1
+      kind: leaf
+      label: Now on active duty
+      parent: MIL.served_or_training
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: MIL.value_2
+      kind: leaf
+      label: On active duty in the past, but not now
+      parent: MIL.served_or_training
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 2
+    - id: MIL.value_3
+      kind: leaf
+      label: Only on active duty for training in Reserves/National Guard
+      parent: MIL.served_or_training
+      leaf_count: 1
+      leaf_values_compressed: '3'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 3
+    - id: MIL.never_served
+      kind: internal
+      label: Never served in the military
+      parent: MIL.ANY
+      leaf_count: 1
+      leaf_values_compressed: '4'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official code 4 is never served.
+      children:
+      - MIL.value_4
+    - id: MIL.value_4
+      kind: leaf
+      label: Never served in the military
+      parent: MIL.never_served
+      leaf_count: 1
+      leaf_values_compressed: '4'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 4
+  ANC:
+    attribute: ANC
+    attribute_type: code
+    root: ANC.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: Single
+        2: Multiple
+        3: Unclassified
+        4: Not reported
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes: *id001
+    nodes:
+    - id: ANC.ANY
+      kind: root
+      label: Any observed ancestry-recode value
+      parent: null
+      leaf_count: 4
+      leaf_values_compressed: 1-4
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - ANC.reported_ancestry
+      - ANC.unresolved_or_not_reported
+    - id: ANC.reported_ancestry
+      kind: internal
+      label: Reported ancestry
+      parent: ANC.ANY
+      leaf_count: 2
+      leaf_values_compressed: 1-2
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 1 and 2 indicate single or multiple reported ancestry.
+      children:
+      - ANC.value_1
+      - ANC.value_2
+    - id: ANC.value_1
+      kind: leaf
+      label: Single
+      parent: ANC.reported_ancestry
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: ANC.value_2
+      kind: leaf
+      label: Multiple
+      parent: ANC.reported_ancestry
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 2
+    - id: ANC.unresolved_or_not_reported
+      kind: internal
+      label: Unclassified or not reported ancestry
+      parent: ANC.ANY
+      leaf_count: 2
+      leaf_values_compressed: 3-4
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 3 and 4 indicate unclassified or not reported ancestry.
+      children:
+      - ANC.value_3
+      - ANC.value_4
+    - id: ANC.value_3
+      kind: leaf
+      label: Unclassified
+      parent: ANC.unresolved_or_not_reported
+      leaf_count: 1
+      leaf_values_compressed: '3'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 3
+    - id: ANC.value_4
+      kind: leaf
+      label: Not reported
+      parent: ANC.unresolved_or_not_reported
+      leaf_count: 1
+      leaf_values_compressed: '4'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 4
+  NATIVITY:
+    attribute: NATIVITY
+    attribute_type: code
+    root: NATIVITY.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: Native
+        2: Foreign born
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes:
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    - Binary attribute uses a root with two leaf children.
+    nodes:
+    - id: NATIVITY.ANY
+      kind: root
+      label: Any observed nativity code
+      parent: null
+      leaf_count: 2
+      leaf_values_compressed: 1-2
+      depth_from_root: 0
+      height_from_leaf: 1
+      children:
+      - NATIVITY.value_1
+      - NATIVITY.value_2
+    - id: NATIVITY.value_1
+      kind: leaf
+      label: Native
+      parent: NATIVITY.ANY
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: NATIVITY.value_2
+      kind: leaf
+      label: Foreign born
+      parent: NATIVITY.ANY
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 2
+  DEAR:
+    attribute: DEAR
+    attribute_type: code
+    root: DEAR.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: 'Yes'
+        2: 'No'
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes:
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    - Binary attribute uses a root with two leaf children.
+    nodes:
+    - id: DEAR.ANY
+      kind: root
+      label: Any observed hearing-difficulty code
+      parent: null
+      leaf_count: 2
+      leaf_values_compressed: 1-2
+      depth_from_root: 0
+      height_from_leaf: 1
+      children:
+      - DEAR.value_1
+      - DEAR.value_2
+    - id: DEAR.value_1
+      kind: leaf
+      label: 'Yes'
+      parent: DEAR.ANY
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: DEAR.value_2
+      kind: leaf
+      label: 'No'
+      parent: DEAR.ANY
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 2
+  DEYE:
+    attribute: DEYE
+    attribute_type: code
+    root: DEYE.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: 'Yes'
+        2: 'No'
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes:
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    - Binary attribute uses a root with two leaf children.
+    nodes:
+    - id: DEYE.ANY
+      kind: root
+      label: Any observed vision-difficulty code
+      parent: null
+      leaf_count: 2
+      leaf_values_compressed: 1-2
+      depth_from_root: 0
+      height_from_leaf: 1
+      children:
+      - DEYE.value_1
+      - DEYE.value_2
+    - id: DEYE.value_1
+      kind: leaf
+      label: 'Yes'
+      parent: DEYE.ANY
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: DEYE.value_2
+      kind: leaf
+      label: 'No'
+      parent: DEYE.ANY
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 2
+  DREM:
+    attribute: DREM
+    attribute_type: code
+    root: DREM.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: 'Yes'
+        2: 'No'
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes:
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    - Binary observed domain uses a root with two leaf children; the Census blank/b N/A value is not observed in this export.
+    nodes:
+    - id: DREM.ANY
+      kind: root
+      label: Any observed cognitive-difficulty code
+      parent: null
+      leaf_count: 2
+      leaf_values_compressed: 1-2
+      depth_from_root: 0
+      height_from_leaf: 1
+      children:
+      - DREM.value_1
+      - DREM.value_2
+    - id: DREM.value_1
+      kind: leaf
+      label: 'Yes'
+      parent: DREM.ANY
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: DREM.value_2
+      kind: leaf
+      label: 'No'
+      parent: DREM.ANY
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 2
+  PINCP:
+    attribute: PINCP
+    attribute_type: continuous
+    root: PINCP.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      rule: Use closed integer income intervals that preserve loss, zero-income, and positive-income brackets within the exported
+        range.
+    notes: *id002
+    nodes:
+    - id: PINCP.ANY
+      kind: root
+      label: Any observed total personal income in exported range
+      parent: null
+      leaf_count: 40701
+      leaf_values_compressed: -10700 ~ -1, 0 ~ 0, 1 ~ 4999, 5000 ~ 9999, 10000 ~ 14999, 15000 ~ 19999, 20000 ~ 24999, 25000
+        ~ 30000
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - PINCP.loss
+      - PINCP.no_income
+      - PINCP.positive_income
+    - id: PINCP.loss
+      kind: internal
+      label: Negative personal income
+      parent: PINCP.ANY
+      leaf_count: 10700
+      leaf_values_compressed: -10700 ~ -1
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Negative values are income losses.
+      children:
+      - PINCP.value_minus_10700_to_minus_1
+    - id: PINCP.value_minus_10700_to_minus_1
+      kind: leaf
+      label: Negative personal income or loss
+      parent: PINCP.loss
+      leaf_count: 10700
+      leaf_values_compressed: -10700 ~ -1
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: -10700 ~ -1
+    - id: PINCP.no_income
+      kind: internal
+      label: No personal income
+      parent: PINCP.ANY
+      leaf_count: 1
+      leaf_values_compressed: 0 ~ 0
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Zero is separated from losses and positive income.
+      children:
+      - PINCP.value_0_to_0
+    - id: PINCP.value_0_to_0
+      kind: leaf
+      label: No personal income
+      parent: PINCP.no_income
+      leaf_count: 1
+      leaf_values_compressed: 0 ~ 0
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 0 ~ 0
+    - id: PINCP.positive_income
+      kind: internal
+      label: Positive personal income
+      parent: PINCP.ANY
+      leaf_count: 30000
+      leaf_values_compressed: 1 ~ 4999, 5000 ~ 9999, 10000 ~ 14999, 15000 ~ 19999, 20000 ~ 24999, 25000 ~ 30000
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Positive income is grouped into adjacent dollar brackets.
+      children:
+      - PINCP.value_1_to_4999
+      - PINCP.value_5000_to_9999
+      - PINCP.value_10000_to_14999
+      - PINCP.value_15000_to_19999
+      - PINCP.value_20000_to_24999
+      - PINCP.value_25000_to_30000
+    - id: PINCP.value_1_to_4999
+      kind: leaf
+      label: Personal income $1 through $4,999
+      parent: PINCP.positive_income
+      leaf_count: 4999
+      leaf_values_compressed: 1 ~ 4999
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 1 ~ 4999
+    - id: PINCP.value_5000_to_9999
+      kind: leaf
+      label: Personal income $5,000 through $9,999
+      parent: PINCP.positive_income
+      leaf_count: 5000
+      leaf_values_compressed: 5000 ~ 9999
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 5000 ~ 9999
+    - id: PINCP.value_10000_to_14999
+      kind: leaf
+      label: Personal income $10,000 through $14,999
+      parent: PINCP.positive_income
+      leaf_count: 5000
+      leaf_values_compressed: 10000 ~ 14999
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 10000 ~ 14999
+    - id: PINCP.value_15000_to_19999
+      kind: leaf
+      label: Personal income $15,000 through $19,999
+      parent: PINCP.positive_income
+      leaf_count: 5000
+      leaf_values_compressed: 15000 ~ 19999
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 15000 ~ 19999
+    - id: PINCP.value_20000_to_24999
+      kind: leaf
+      label: Personal income $20,000 through $24,999
+      parent: PINCP.positive_income
+      leaf_count: 5000
+      leaf_values_compressed: 20000 ~ 24999
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 20000 ~ 24999
+    - id: PINCP.value_25000_to_30000
+      kind: leaf
+      label: Personal income $25,000 through $30,000
+      parent: PINCP.positive_income
+      leaf_count: 5001
+      leaf_values_compressed: 25000 ~ 30000
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 25000 ~ 30000
+  ESR:
+    attribute: ESR
+    attribute_type: code
+    root: ESR.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        0: 'Folktables numeric 0 for Census blank/b N/A: less than 16 years old'
+        1: Civilian employed, at work
+        2: Civilian employed, with a job but not at work
+        3: Unemployed
+        4: Armed forces, at work
+        5: Armed forces, with a job but not at work
+        6: Not in labor force
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes:
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    - Observed value 0 is a Folktables numeric encoding of the Census blank/b N/A category for this attribute and is retained
+      as its own semantic leaf.
+    nodes:
+    - id: ESR.ANY
+      kind: root
+      label: Any observed employment-status recode
+      parent: null
+      leaf_count: 7
+      leaf_values_compressed: 0-6
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - ESR.exported_na
+      - ESR.civilian_employed
+      - ESR.unemployed
+      - ESR.armed_forces
+      - ESR.not_in_labor_force
+    - id: ESR.exported_na
+      kind: internal
+      label: Not applicable employment status
+      parent: ESR.ANY
+      leaf_count: 1
+      leaf_values_compressed: '0'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Observed value 0 encodes the Census blank/b N/A category for people less than 16 years old.
+      children:
+      - ESR.value_0
+    - id: ESR.value_0
+      kind: leaf
+      label: 'Folktables numeric 0 for Census blank/b N/A: less than 16 years old'
+      parent: ESR.exported_na
+      leaf_count: 1
+      leaf_values_compressed: '0'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 0
+    - id: ESR.civilian_employed
+      kind: internal
+      label: Civilian employed
+      parent: ESR.ANY
+      leaf_count: 2
+      leaf_values_compressed: 1-2
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 1 and 2 are civilian employed categories.
+      children:
+      - ESR.value_1
+      - ESR.value_2
+    - id: ESR.value_1
+      kind: leaf
+      label: Civilian employed, at work
+      parent: ESR.civilian_employed
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: ESR.value_2
+      kind: leaf
+      label: Civilian employed, with a job but not at work
+      parent: ESR.civilian_employed
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 2
+    - id: ESR.unemployed
+      kind: internal
+      label: Unemployed
+      parent: ESR.ANY
+      leaf_count: 1
+      leaf_values_compressed: '3'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official code 3 is unemployed.
+      children:
+      - ESR.value_3
+    - id: ESR.value_3
+      kind: leaf
+      label: Unemployed
+      parent: ESR.unemployed
+      leaf_count: 1
+      leaf_values_compressed: '3'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 3
+    - id: ESR.armed_forces
+      kind: internal
+      label: Armed forces
+      parent: ESR.ANY
+      leaf_count: 2
+      leaf_values_compressed: 4-5
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 4 and 5 are armed-forces employment categories.
+      children:
+      - ESR.value_4
+      - ESR.value_5
+    - id: ESR.value_4
+      kind: leaf
+      label: Armed forces, at work
+      parent: ESR.armed_forces
+      leaf_count: 1
+      leaf_values_compressed: '4'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 4
+    - id: ESR.value_5
+      kind: leaf
+      label: Armed forces, with a job but not at work
+      parent: ESR.armed_forces
+      leaf_count: 1
+      leaf_values_compressed: '5'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 5
+    - id: ESR.not_in_labor_force
+      kind: internal
+      label: Not in labor force
+      parent: ESR.ANY
+      leaf_count: 1
+      leaf_values_compressed: '6'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official code 6 is not in labor force.
+      children:
+      - ESR.value_6
+    - id: ESR.value_6
+      kind: leaf
+      label: Not in labor force
+      parent: ESR.not_in_labor_force
+      leaf_count: 1
+      leaf_values_compressed: '6'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 6
+  ST:
+    attribute: ST
+    attribute_type: code
+    root: ST.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        6: California/CA
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes:
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    - Only California is observed in this export, so the tree has one leaf.
+    nodes:
+    - id: ST.ANY
+      kind: root
+      label: Any observed state code
+      parent: null
+      leaf_count: 1
+      leaf_values_compressed: '6'
+      depth_from_root: 0
+      height_from_leaf: 1
+      children:
+      - ST.value_6
+    - id: ST.value_6
+      kind: leaf
+      label: California/CA
+      parent: ST.ANY
+      leaf_count: 1
+      leaf_values_compressed: '6'
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 6
+  FER:
+    attribute: FER
+    attribute_type: code
+    root: FER.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        0: 'Folktables numeric 0 for Census blank/b N/A: less than 15 years old, greater than 50 years, or male'
+        1: Yes, gave birth to child within the past 12 months
+        2: No, did not give birth to child within the past 12 months
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes:
+    - Leaves are restricted to values reported in the QI value-domain export.
+    - Code meanings were resolved from the official 2014 ACS PUMS Data Dictionary before grouping.
+    - Numeric code leaves are emitted as bare integers to match the loaded CSV dtype.
+    - Observed value 0 is a Folktables numeric encoding of the Census blank/b N/A category for this attribute and is retained
+      as its own semantic leaf.
+    nodes:
+    - id: FER.ANY
+      kind: root
+      label: Any observed recent-birth code
+      parent: null
+      leaf_count: 3
+      leaf_values_compressed: 0-2
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - FER.exported_na
+      - FER.defined_recent_birth_status
+    - id: FER.exported_na
+      kind: internal
+      label: Not applicable recent-birth status
+      parent: FER.ANY
+      leaf_count: 1
+      leaf_values_compressed: '0'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Observed value 0 encodes the Census blank/b N/A category.
+      children:
+      - FER.value_0
+    - id: FER.value_0
+      kind: leaf
+      label: 'Folktables numeric 0 for Census blank/b N/A: less than 15 years old, greater than 50 years, or male'
+      parent: FER.exported_na
+      leaf_count: 1
+      leaf_values_compressed: '0'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 0
+    - id: FER.defined_recent_birth_status
+      kind: internal
+      label: Defined recent-birth status
+      parent: FER.ANY
+      leaf_count: 2
+      leaf_values_compressed: 1-2
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official codes 1 and 2 are yes/no responses for giving birth within the past 12 months.
+      children:
+      - FER.value_1
+      - FER.value_2
+    - id: FER.value_1
+      kind: leaf
+      label: Yes, gave birth to child within the past 12 months
+      parent: FER.defined_recent_birth_status
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: FER.value_2
+      kind: leaf
+      label: No, did not give birth to child within the past 12 months
+      parent: FER.defined_recent_birth_status
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 2
+  RAC1P:
+    attribute: RAC1P
+    attribute_type: code
+    root: RAC1P.ANY
+    source:
+      codebook: 2014 ACS PUMS Data Dictionary
+      codebook_publisher: U.S. Census Bureau
+      codebook_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.pdf
+      codebook_text_url: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMSDataDict14.txt
+      external_semantic_reference: 2014 ACS PUMS Data Dictionary; https://www.census.gov/programs-surveys/acs/microdata/documentation/2014.html
+      code_definitions:
+        1: White alone
+        2: Black or African American alone
+        3: American Indian alone
+        4: Alaska Native alone
+        5: American Indian and Alaska Native tribes specified; or American Indian or Alaska Native, not specified and no other
+          races
+        6: Asian alone
+        7: Native Hawaiian and Other Pacific Islander alone
+        8: Some Other Race alone
+        9: Two or More Races
+      rule: Group official ACS PUMS code meanings into audit-oriented semantic families; Folktables numeric 0 values are retained
+        only where observed and documented as Census blank/b N/A encodings.
+    notes: *id001
+    nodes:
+    - id: RAC1P.ANY
+      kind: root
+      label: Any observed race-recode value
+      parent: null
+      leaf_count: 9
+      leaf_values_compressed: 1-9
+      depth_from_root: 0
+      height_from_leaf: 3
+      children:
+      - RAC1P.single_race
+      - RAC1P.two_or_more_races
+    - id: RAC1P.single_race
+      kind: internal
+      label: Single race alone
+      parent: RAC1P.ANY
+      leaf_count: 8
+      leaf_values_compressed: 1-8
+      depth_from_root: 1
+      height_from_leaf: 2
+      rationale: Official codes 1 through 8 identify single-race categories.
+      children:
+      - RAC1P.white_alone
+      - RAC1P.black_alone
+      - RAC1P.american_indian_alaska_native
+      - RAC1P.asian_alone
+      - RAC1P.nhpi_alone
+      - RAC1P.some_other_race_alone
+    - id: RAC1P.white_alone
+      kind: internal
+      label: White alone
+      parent: RAC1P.single_race
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 2
+      height_from_leaf: 1
+      rationale: Official code 1 is White alone.
+      children:
+      - RAC1P.value_1
+    - id: RAC1P.value_1
+      kind: leaf
+      label: White alone
+      parent: RAC1P.white_alone
+      leaf_count: 1
+      leaf_values_compressed: '1'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 1
+    - id: RAC1P.black_alone
+      kind: internal
+      label: Black or African American alone
+      parent: RAC1P.single_race
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 2
+      height_from_leaf: 1
+      rationale: Official code 2 is Black or African American alone.
+      children:
+      - RAC1P.value_2
+    - id: RAC1P.value_2
+      kind: leaf
+      label: Black or African American alone
+      parent: RAC1P.black_alone
+      leaf_count: 1
+      leaf_values_compressed: '2'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 2
+    - id: RAC1P.american_indian_alaska_native
+      kind: internal
+      label: American Indian or Alaska Native alone
+      parent: RAC1P.single_race
+      leaf_count: 3
+      leaf_values_compressed: 3-5
+      depth_from_root: 2
+      height_from_leaf: 1
+      rationale: Official codes 3 through 5 are American Indian and/or Alaska Native categories.
+      children:
+      - RAC1P.value_3
+      - RAC1P.value_4
+      - RAC1P.value_5
+    - id: RAC1P.value_3
+      kind: leaf
+      label: American Indian alone
+      parent: RAC1P.american_indian_alaska_native
+      leaf_count: 1
+      leaf_values_compressed: '3'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 3
+    - id: RAC1P.value_4
+      kind: leaf
+      label: Alaska Native alone
+      parent: RAC1P.american_indian_alaska_native
+      leaf_count: 1
+      leaf_values_compressed: '4'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 4
+    - id: RAC1P.value_5
+      kind: leaf
+      label: American Indian and Alaska Native tribes specified; or American Indian or Alaska Native, not specified and no
+        other races
+      parent: RAC1P.american_indian_alaska_native
+      leaf_count: 1
+      leaf_values_compressed: '5'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 5
+    - id: RAC1P.asian_alone
+      kind: internal
+      label: Asian alone
+      parent: RAC1P.single_race
+      leaf_count: 1
+      leaf_values_compressed: '6'
+      depth_from_root: 2
+      height_from_leaf: 1
+      rationale: Official code 6 is Asian alone.
+      children:
+      - RAC1P.value_6
+    - id: RAC1P.value_6
+      kind: leaf
+      label: Asian alone
+      parent: RAC1P.asian_alone
+      leaf_count: 1
+      leaf_values_compressed: '6'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 6
+    - id: RAC1P.nhpi_alone
+      kind: internal
+      label: Native Hawaiian and Other Pacific Islander alone
+      parent: RAC1P.single_race
+      leaf_count: 1
+      leaf_values_compressed: '7'
+      depth_from_root: 2
+      height_from_leaf: 1
+      rationale: Official code 7 is Native Hawaiian and Other Pacific Islander alone.
+      children:
+      - RAC1P.value_7
+    - id: RAC1P.value_7
+      kind: leaf
+      label: Native Hawaiian and Other Pacific Islander alone
+      parent: RAC1P.nhpi_alone
+      leaf_count: 1
+      leaf_values_compressed: '7'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 7
+    - id: RAC1P.some_other_race_alone
+      kind: internal
+      label: Some Other Race alone
+      parent: RAC1P.single_race
+      leaf_count: 1
+      leaf_values_compressed: '8'
+      depth_from_root: 2
+      height_from_leaf: 1
+      rationale: Official code 8 is Some Other Race alone.
+      children:
+      - RAC1P.value_8
+    - id: RAC1P.value_8
+      kind: leaf
+      label: Some Other Race alone
+      parent: RAC1P.some_other_race_alone
+      leaf_count: 1
+      leaf_values_compressed: '8'
+      depth_from_root: 3
+      height_from_leaf: 0
+      children: []
+      value: 8
+    - id: RAC1P.two_or_more_races
+      kind: internal
+      label: Two or More Races
+      parent: RAC1P.ANY
+      leaf_count: 1
+      leaf_values_compressed: '9'
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Official code 9 is Two or More Races.
+      children:
+      - RAC1P.value_9
+    - id: RAC1P.value_9
+      kind: leaf
+      label: Two or More Races
+      parent: RAC1P.two_or_more_races
+      leaf_count: 1
+      leaf_values_compressed: '9'
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 9
+audit_summary:
+  all_coverage_ok: true
+  all_parent_links_ok: true
+  all_sibling_disjointness_ok: true
+  attributes:
+  - attribute: AGEP
+    observed_leaf_count: 50
+    tree_leaf_count: 50
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 11
+    max_height_from_leaf: 2
+  - attribute: SCHL
+    observed_leaf_count: 24
+    tree_leaf_count: 24
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 32
+    max_height_from_leaf: 2
+  - attribute: MAR
+    observed_leaf_count: 5
+    tree_leaf_count: 5
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 9
+    max_height_from_leaf: 2
+  - attribute: SEX
+    observed_leaf_count: 2
+    tree_leaf_count: 2
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 3
+    max_height_from_leaf: 1
+  - attribute: DIS
+    observed_leaf_count: 2
+    tree_leaf_count: 2
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 3
+    max_height_from_leaf: 1
+  - attribute: ESP
+    observed_leaf_count: 9
+    tree_leaf_count: 9
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 14
+    max_height_from_leaf: 2
+  - attribute: CIT
+    observed_leaf_count: 5
+    tree_leaf_count: 5
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 10
+    max_height_from_leaf: 3
+  - attribute: MIG
+    observed_leaf_count: 3
+    tree_leaf_count: 3
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 6
+    max_height_from_leaf: 2
+  - attribute: MIL
+    observed_leaf_count: 5
+    tree_leaf_count: 5
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 9
+    max_height_from_leaf: 2
+  - attribute: ANC
+    observed_leaf_count: 4
+    tree_leaf_count: 4
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 7
+    max_height_from_leaf: 2
+  - attribute: NATIVITY
+    observed_leaf_count: 2
+    tree_leaf_count: 2
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 3
+    max_height_from_leaf: 1
+  - attribute: DEAR
+    observed_leaf_count: 2
+    tree_leaf_count: 2
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 3
+    max_height_from_leaf: 1
+  - attribute: DEYE
+    observed_leaf_count: 2
+    tree_leaf_count: 2
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 3
+    max_height_from_leaf: 1
+  - attribute: DREM
+    observed_leaf_count: 2
+    tree_leaf_count: 2
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 3
+    max_height_from_leaf: 1
+  - attribute: PINCP
+    observed_leaf_count: 40701
+    tree_leaf_count: 40701
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 12
+    max_height_from_leaf: 2
+  - attribute: ESR
+    observed_leaf_count: 7
+    tree_leaf_count: 7
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 13
+    max_height_from_leaf: 2
+  - attribute: ST
+    observed_leaf_count: 1
+    tree_leaf_count: 1
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 2
+    max_height_from_leaf: 1
+  - attribute: FER
+    observed_leaf_count: 3
+    tree_leaf_count: 3
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 6
+    max_height_from_leaf: 2
+  - attribute: RAC1P
+    observed_leaf_count: 9
+    tree_leaf_count: 9
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 18
+    max_height_from_leaf: 3

@@ -1,0 +1,47 @@
+# Configuration file for Exp-32. Copy it before changing parameters.
+dataset: income
+data_path: null
+generalization_tree_path: null
+results_root: results/exp32_ranking
+device: cuda
+dtype: float32
+allow_cpu_fallback: true
+seeds: [42, 43, 44, 45, 46]
+
+# Candidate retraining is the ranking reference, so this configuration keeps
+# proxy and downstream specifications identical.
+model:
+  downstream: &shared_mlp
+    family: mlp
+    hidden_sizes: [32, 32]
+    epochs: 300
+    lr: 0.01
+    weight_decay: 0.001
+  proxy: *shared_mlp
+  estimator: *shared_mlp
+
+pipeline:
+  reference_model_filtering: false
+  tolerance: 0.05
+  nrows: 200000
+  val_size: 0.15
+  test_size: 0.15
+  max_iterations: 50
+  initial_sample_fraction: 0.012
+  rank_top_k: 7
+  release_target_k: null
+
+# Exp-32 measures the union of each ranker's leading candidates. This is an
+# evaluation budget, not a hidden constant in the ranking implementation.
+oracle_candidate_limit_per_type: 100
+
+# Yang-style fixed-original MLP: Last for Horizontal and All for Vertical.
+yang_if:
+  horizontal_last:
+    damping: 0.00001
+    cg_max_iter: 10
+    cg_tolerance: 0.0
+  vertical_all:
+    damping: 0.1
+    cg_max_iter: 10
+    cg_tolerance: 0.0

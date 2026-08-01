@@ -1,0 +1,79 @@
+# Configuration file for Exp-2 attack evaluation.
+experiment_id: exp2_attacks
+results_root: results/experiments
+
+defaults:
+  dataset: income
+  model_name: mlp
+  data_path: data/acs
+  evaluation_split: test
+  release_points: [final]
+  device: cuda
+  dtype: float32
+  allow_cpu_fallback: true
+  trim_task:
+    initial_sample_fraction: 0.06
+    model_name: mlp
+    model:
+      downstream:
+        family: mlp
+        hidden_sizes: [32, 32]
+        epochs: 300
+        lr: 0.01
+        weight_decay: 0.001
+      proxy:
+        family: mlp
+        hidden_sizes: [32, 32]
+        epochs: 300
+        lr: 0.01
+        weight_decay: 0.001
+      estimator:
+        family: torch_logistic
+        max_iter: 300
+    pipeline:
+      nrows: 150000
+      val_size: 0.15
+      test_size: 0.15
+      tolerance: 0.05
+      max_iterations: 50
+      rank_top_k: 7
+      stop_on_utility: true
+  reconstruction:
+    fold_count: 5
+    fold_index: 0
+    include_label: false
+    numeric_tolerance: 0.03
+    model:
+      family: mlp
+      hidden_sizes: [32, 32]
+      epochs: 300
+      lr: 0.01
+      weight_decay: 0.001
+  linkage:
+    strategy: mlp_raw_b
+    query_size: 10000
+    a_attributes: [OCCP, SCHL, WKHP, AGEP, SEX, MAR, RELP]
+    b_attributes: [POBP]
+    model:
+      family: mlp
+      hidden_sizes: [32, 32]
+      epochs: 300
+      lr: 0.01
+      weight_decay: 0.001
+
+runs:
+  - run_id: income_seed42
+    seed: 42
+    trim_task: {pipeline: {random_state: 42}}
+  - run_id: income_seed43
+    seed: 43
+    trim_task: {pipeline: {random_state: 43}}
+  - run_id: income_seed44
+    seed: 44
+    trim_task: {pipeline: {random_state: 44}}
+  - run_id: income_seed45
+    seed: 45
+    trim_task: {pipeline: {random_state: 45}}
+  - run_id: income_seed46
+    seed: 46
+    trim_task: {pipeline: {random_state: 46}}

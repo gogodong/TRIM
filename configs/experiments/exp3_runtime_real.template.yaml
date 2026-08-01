@@ -1,0 +1,66 @@
+# Configuration file for Exp-3 real-dataset runtime evaluation.
+experiment_id: exp3_runtime_real
+experiment_kind: exp3_runtime_real
+results_root: results/exp3_runtime_real
+run_prefix: exp3_real
+
+base_task:
+  device: cuda
+  dtype: float32
+  allow_cpu_fallback: true
+  model_name: mlp
+  model:
+    downstream:
+      family: mlp
+      hidden_sizes: [32, 32]
+      epochs: 300
+      lr: 0.01
+      weight_decay: 0.001
+    proxy:
+      family: torch_logistic
+      max_iter: 300
+    estimator:
+      family: torch_logistic
+      max_iter: 300
+  pipeline:
+    val_size: 0.15
+    test_size: 0.15
+    max_iterations: 50
+    rank_top_k: 7
+    stop_on_utility: false
+    record_iteration_test_metrics: true
+
+axes:
+  - name: dataset
+    values:
+      - label: income
+        patch:
+          dataset: income
+          initial_sample_fraction: 0.005
+          report_tolerance: 0.05
+          pipeline: {nrows: 120000, tolerance: 0.05}
+      - label: pubcov
+        patch:
+          dataset: pubcov
+          initial_sample_fraction: 0.01
+          report_tolerance: 0.05
+          pipeline: {nrows: 120000, tolerance: 0.05}
+      - label: bm
+        patch:
+          dataset: bm
+          initial_sample_fraction: 0.04
+          report_tolerance: 0.005
+          pipeline: {nrows: 45211, tolerance: 0.005}
+      - label: diabetes
+        patch:
+          dataset: diabetes
+          initial_sample_fraction: 0.04
+          report_tolerance: 0.02
+          pipeline: {nrows: 101766, tolerance: 0.02}
+  - name: seed
+    values:
+      - {label: 42, patch: {pipeline: {random_state: 42}}}
+      - {label: 43, patch: {pipeline: {random_state: 43}}}
+      - {label: 44, patch: {pipeline: {random_state: 44}}}
+      - {label: 45, patch: {pipeline: {random_state: 45}}}
+      - {label: 46, patch: {pipeline: {random_state: 46}}}

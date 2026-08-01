@@ -1,0 +1,45 @@
+# Configuration file for the Exp-5 background-size evaluation.
+experiment_id: exp5_background
+experiment_kind: exp5_background
+results_root: results/exp5_background
+run_prefix: exp5_background
+
+base_task:
+  dataset: income
+  device: cuda
+  dtype: float32
+  allow_cpu_fallback: true
+  initial_sample_fraction: 0.06
+  report_tolerance: 0.05
+  release_selection: final
+  known_attribute_counts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  model_name: mlp
+  model:
+    downstream:
+      family: mlp
+      hidden_sizes: [32, 32]
+      epochs: 300
+      lr: 0.01
+      weight_decay: 0.001
+    proxy:
+      family: torch_logistic
+      max_iter: 300
+    estimator:
+      family: torch_logistic
+      max_iter: 300
+  pipeline:
+    nrows: 150000
+    tolerance: 0.02
+    val_size: 0.15
+    test_size: 0.15
+    max_iterations: 50
+    rank_top_k: 7
+
+axes:
+  - name: seed
+    values:
+      - {label: 42, patch: {pipeline: {random_state: 42}}}
+      - {label: 43, patch: {pipeline: {random_state: 43}}}
+      - {label: 44, patch: {pipeline: {random_state: 44}}}
+      - {label: 45, patch: {pipeline: {random_state: 45}}}
+      - {label: 46, patch: {pipeline: {random_state: 46}}}

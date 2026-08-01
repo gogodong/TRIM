@@ -1,0 +1,66 @@
+# Configuration file for Exp-6a2. Copy it before changing parameters.
+# Supply tolerance with the required --tolerance option.
+experiment_id: exp6a2_structural
+experiment_kind: exp6a2_structural
+results_root: results/exp6a2_structural
+run_prefix: exp6a2
+refine_evict_threshold: 30
+
+# TRIM-H uses a fixed level-0 KMeans cluster-ring partition.
+horizontal_kmeans:
+  n_clusters: 7
+  n_rings: 7
+  random_state: 42
+
+base_task:
+  dataset: pubcov
+  device: cuda
+  dtype: float32
+  allow_cpu_fallback: true
+  initial_sample_fraction: 0.0025
+  model_name: xgboost
+  model:
+    downstream:
+      family: xgboost
+      n_estimators: 100
+      max_depth: 3
+      learning_rate: 0.1
+      subsample: 1.0
+      colsample_bytree: 1.0
+      reg_lambda: 1.0
+      min_child_weight: 1.0
+      tree_method: hist
+      eval_metric: logloss
+      n_jobs: 1
+      warm_start: false
+    proxy:
+      family: torch_logistic
+      max_iter: 300
+    estimator:
+      family: torch_logistic
+      max_iter: 300
+      warm_start: true
+      lbfgs_history_size: 100
+      line_search_fn: strong_wolfe
+  pipeline:
+    nrows: 152676
+    val_size: 0.15
+    test_size: 0.15
+    max_iterations: 50
+    rank_top_k: 7
+    release_target_k: null
+    stop_on_utility: true
+    record_iteration_test_metrics: true
+
+axes:
+  - name: method
+    values:
+      - {label: TRIM, patch: {method: TRIM}}
+      # The largest ring replaces S0 and is a genuine published seed.
+      - {label: TRIM-H, patch: {method: TRIM-H, initial_sample_fraction: null}}
+      - {label: TRIM-V, patch: {method: TRIM-V}}
+      - {label: RefineOnly, patch: {method: RefineOnly}}
+      - {label: RefineEvict, patch: {method: RefineEvict}}
+  - name: seed
+    values:
+      - {label: 42, patch: {pipeline: {random_state: 42}}}

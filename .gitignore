@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+results/
+figures/
+outputs/
+*.log
+
+# Raw datasets are downloaded by the user and are not stored in the repository.
+data/acs/
+data/bank_marketing/
+data/bng_credit_g/
+data/diabetes_130_us_hospitals/

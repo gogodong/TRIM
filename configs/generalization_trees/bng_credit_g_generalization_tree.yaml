@@ -1,0 +1,2556 @@
+schema_version: bng_credit_g_generalization_tree.v1
+generated_at: '2026-07-06T00:00:00-04:00'
+dataset:
+  name: bng_credit_g
+  qi_attributes:
+    - checking_status
+    - duration
+    - credit_history
+    - purpose
+    - credit_amount
+    - savings_status
+    - employment
+    - installment_commitment
+    - personal_status
+    - other_parties
+    - residence_since
+    - property_magnitude
+    - age
+    - other_payment_plans
+    - housing
+    - existing_credits
+    - job
+    - num_dependents
+    - own_telephone
+    - foreign_worker
+  source_reference:
+    catalog_family: BNG/OpenML credit-g derived from UCI Statlog German Credit Data
+    year_or_vintage: 1994 UCI donation; BNG synthetic derivative
+    codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+    codebook_publisher: UCI Machine Learning Repository
+    codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+audit_policy:
+  leaf_domain: Only values observed in the QI value-domain export are included as leaves.
+  required_checks:
+    - coverage
+    - parent_link_consistency
+    - sibling_disjointness
+  coverage_expectation: Each observed value appears as exactly one leaf in its attribute tree.
+  continuous_coverage: For a continuous attribute, expand the exported observed_values_compressed `lo ~ hi` range into its integer set and verify that every integer falls in exactly one leaf interval (adjacent sibling intervals must be disjoint); code/categorical attributes are checked one-observed-value per leaf as usual.
+attribute_observed_domains:
+  checking_status:
+    attribute_type: code
+    observed_count: 4
+    observed_values:
+      - 0<=X<200
+      - <0
+      - '>=200'
+      - no checking
+  duration:
+    attribute_type: continuous
+    observed_count: 971857
+    observed_values_compressed: -1.543527 ~ 78.343283
+  credit_history:
+    attribute_type: code
+    observed_count: 5
+    observed_values:
+      - all paid
+      - critical/other existing credit
+      - delayed previously
+      - existing paid
+      - no credits/all paid
+  purpose:
+    attribute_type: code
+    observed_count: 11
+    observed_values:
+      - business
+      - domestic appliance
+      - education
+      - furniture/equipment
+      - new car
+      - other
+      - radio/tv
+      - repairs
+      - retraining
+      - used car
+      - vacation
+  credit_amount:
+    attribute_type: continuous
+    observed_count: 999900
+    observed_values_compressed: -5997.669542 ~ 22001.953049
+  savings_status:
+    attribute_type: code
+    observed_count: 5
+    observed_values:
+      - 100<=X<500
+      - 500<=X<1000
+      - <100
+      - '>=1000'
+      - no known savings
+  employment:
+    attribute_type: code
+    observed_count: 5
+    observed_values:
+      - 1<=X<4
+      - 4<=X<7
+      - <1
+      - '>=7'
+      - unemployed
+  installment_commitment:
+    attribute_type: continuous
+    observed_count: 4
+    observed_values_compressed: 1 ~ 4
+  personal_status:
+    attribute_type: code
+    observed_count: 5
+    observed_values:
+      - female div/dep/mar
+      - female single
+      - male div/sep
+      - male mar/wid
+      - male single
+  other_parties:
+    attribute_type: code
+    observed_count: 3
+    observed_values:
+      - co applicant
+      - guarantor
+      - none
+  residence_since:
+    attribute_type: continuous
+    observed_count: 4
+    observed_values_compressed: 1 ~ 4
+  property_magnitude:
+    attribute_type: code
+    observed_count: 4
+    observed_values:
+      - car
+      - life insurance
+      - no known property
+      - real estate
+  age:
+    attribute_type: continuous
+    observed_count: 983864
+    observed_values_compressed: 16.312481 ~ 90.23636
+  other_payment_plans:
+    attribute_type: code
+    observed_count: 3
+    observed_values:
+      - bank
+      - none
+      - stores
+  housing:
+    attribute_type: code
+    observed_count: 3
+    observed_values:
+      - for free
+      - own
+      - rent
+  existing_credits:
+    attribute_type: continuous
+    observed_count: 4
+    observed_values_compressed: 1 ~ 4
+  job:
+    attribute_type: code
+    observed_count: 4
+    observed_values:
+      - high qualif/self emp/mgmt
+      - skilled
+      - unemp/unskilled non res
+      - unskilled resident
+  num_dependents:
+    attribute_type: continuous
+    observed_count: 2
+    observed_values_compressed: 1 ~ 2
+  own_telephone:
+    attribute_type: code
+    observed_count: 2
+    observed_values:
+      - none
+      - 'yes'
+  foreign_worker:
+    attribute_type: code
+    observed_count: 2
+    observed_values:
+      - 'no'
+      - 'yes'
+trees:
+  checking_status:
+    attribute: checking_status
+    attribute_type: code
+    root: checking_status.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        0<=X<200: 'A12: status of existing checking account is 0 <= balance < 200 DM'
+        <0: 'A11: status of existing checking account is balance < 0 DM'
+        '>=200': 'A13: status of existing checking account is balance >= 200 DM or salary assignments for at least 1 year'
+        no checking: 'A14: no checking account'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Observed labels are credit-g recodings of UCI A11-A14 checking-account statuses.
+    nodes:
+      - id: checking_status.ANY
+        kind: root
+        label: Any checking-account status
+        parent: null
+        leaf_count: 4
+        leaf_values_compressed:
+          - <0
+          - 0<=X<200
+          - '>=200'
+          - no checking
+        depth_from_root: 0
+        height_from_leaf: 2
+        children:
+          - checking_status.has_checking_account
+          - checking_status.value_no_checking
+      - id: checking_status.has_checking_account
+        kind: internal
+        label: Has checking account
+        parent: checking_status.ANY
+        leaf_count: 3
+        leaf_values_compressed:
+          - <0
+          - 0<=X<200
+          - '>=200'
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - checking_status.value_negative_balance
+          - checking_status.value_0_to_200
+          - checking_status.value_200_plus_or_salary_assignment
+        rationale: Official checking-account statuses distinguish balance bands from no account.
+      - id: checking_status.value_negative_balance
+        kind: leaf
+        label: Negative checking balance
+        parent: checking_status.has_checking_account
+        leaf_count: 1
+        leaf_values_compressed:
+          - <0
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: <0
+      - id: checking_status.value_0_to_200
+        kind: leaf
+        label: Low to moderate checking balance
+        parent: checking_status.has_checking_account
+        leaf_count: 1
+        leaf_values_compressed:
+          - 0<=X<200
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 0<=X<200
+      - id: checking_status.value_200_plus_or_salary_assignment
+        kind: leaf
+        label: High checking balance or salary assignment
+        parent: checking_status.has_checking_account
+        leaf_count: 1
+        leaf_values_compressed:
+          - '>=200'
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: '>=200'
+      - id: checking_status.value_no_checking
+        kind: leaf
+        label: No checking account
+        parent: checking_status.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - no checking
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: no checking
+  duration:
+    attribute: duration
+    attribute_type: continuous
+    root: duration.ANY
+    source:
+      rule: Expand the exported real-valued observed range to the integer month set ceil(low) through floor(high); group into repayment-horizon intervals while retaining non-positive generated values.
+    notes:
+      - Continuous exported range expanded to integers -1 through 78 using ceil(low) and floor(high).
+      - Negative and zero duration values are retained as observed generated-domain values.
+    nodes:
+      - id: duration.ANY
+        kind: root
+        label: Any integer credit duration
+        parent: null
+        leaf_count: 80
+        leaf_values_compressed:
+          - -1 ~ 78
+        depth_from_root: 0
+        height_from_leaf: 3
+        children:
+          - duration.value_non_positive
+          - duration.positive_duration
+      - id: duration.value_non_positive
+        kind: leaf
+        label: Non-positive generated duration
+        parent: duration.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - -1 ~ 0
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: -1 ~ 0
+      - id: duration.positive_duration
+        kind: internal
+        label: Positive credit duration
+        parent: duration.ANY
+        leaf_count: 78
+        leaf_values_compressed:
+          - 1 ~ 78
+        depth_from_root: 1
+        height_from_leaf: 2
+        children:
+          - duration.short_duration
+          - duration.medium_duration
+          - duration.long_duration
+        rationale: Positive loan terms grouped by repayment horizon.
+      - id: duration.short_duration
+        kind: internal
+        label: Short duration
+        parent: duration.positive_duration
+        leaf_count: 12
+        leaf_values_compressed:
+          - 1 ~ 12
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - duration.value_1_to_6
+          - duration.value_7_to_12
+        rationale: Shorter repayment horizons are task-relevant for credit risk.
+      - id: duration.value_1_to_6
+        kind: leaf
+        label: Very short duration, up to 6 months
+        parent: duration.short_duration
+        leaf_count: 6
+        leaf_values_compressed:
+          - 1 ~ 6
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 1 ~ 6
+      - id: duration.value_7_to_12
+        kind: leaf
+        label: Short duration, 7 to 12 months
+        parent: duration.short_duration
+        leaf_count: 6
+        leaf_values_compressed:
+          - 7 ~ 12
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 7 ~ 12
+      - id: duration.medium_duration
+        kind: internal
+        label: Medium duration
+        parent: duration.positive_duration
+        leaf_count: 24
+        leaf_values_compressed:
+          - 13 ~ 36
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - duration.value_13_to_24
+          - duration.value_25_to_36
+        rationale: Mid-range repayment horizons preserve loan-term signal.
+      - id: duration.value_13_to_24
+        kind: leaf
+        label: Medium duration, 13 to 24 months
+        parent: duration.medium_duration
+        leaf_count: 12
+        leaf_values_compressed:
+          - 13 ~ 24
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 13 ~ 24
+      - id: duration.value_25_to_36
+        kind: leaf
+        label: Longer medium duration, 25 to 36 months
+        parent: duration.medium_duration
+        leaf_count: 12
+        leaf_values_compressed:
+          - 25 ~ 36
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 25 ~ 36
+      - id: duration.long_duration
+        kind: internal
+        label: Long duration
+        parent: duration.positive_duration
+        leaf_count: 42
+        leaf_values_compressed:
+          - 37 ~ 78
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - duration.value_37_to_60
+          - duration.value_61_to_78
+        rationale: Longer horizons can materially affect default-risk prediction.
+      - id: duration.value_37_to_60
+        kind: leaf
+        label: Long duration, 37 to 60 months
+        parent: duration.long_duration
+        leaf_count: 24
+        leaf_values_compressed:
+          - 37 ~ 60
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 37 ~ 60
+      - id: duration.value_61_to_78
+        kind: leaf
+        label: Extreme duration, 61 to 78 months
+        parent: duration.long_duration
+        leaf_count: 18
+        leaf_values_compressed:
+          - 61 ~ 78
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 61 ~ 78
+  credit_history:
+    attribute: credit_history
+    attribute_type: code
+    root: credit_history.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        all paid: 'A31: all credits at this bank paid back duly'
+        critical/other existing credit: 'A34: critical account or other credits existing not at this bank'
+        delayed previously: 'A33: delay in paying off in the past'
+        existing paid: 'A32: existing credits paid back duly till now'
+        no credits/all paid: 'A30: no credits taken or all credits paid back duly'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Groups preserve repayment-risk semantics relevant to credit-risk classification.
+    nodes:
+      - id: credit_history.ANY
+        kind: root
+        label: Any credit-history status
+        parent: null
+        leaf_count: 5
+        leaf_values_compressed:
+          - no credits/all paid
+          - all paid
+          - existing paid
+          - delayed previously
+          - critical/other existing credit
+        depth_from_root: 0
+        height_from_leaf: 3
+        children:
+          - credit_history.no_adverse_history
+          - credit_history.adverse_or_critical_history
+      - id: credit_history.no_adverse_history
+        kind: internal
+        label: No adverse credit history recorded
+        parent: credit_history.ANY
+        leaf_count: 3
+        leaf_values_compressed:
+          - no credits/all paid
+          - all paid
+          - existing paid
+        depth_from_root: 1
+        height_from_leaf: 2
+        children:
+          - credit_history.no_or_fully_paid_prior_credit
+          - credit_history.value_existing_paid
+        rationale: Official meanings indicate either no prior credit, fully paid credit, or existing credit paid duly.
+      - id: credit_history.no_or_fully_paid_prior_credit
+        kind: internal
+        label: No prior credits or fully paid prior credits
+        parent: credit_history.no_adverse_history
+        leaf_count: 2
+        leaf_values_compressed:
+          - no credits/all paid
+          - all paid
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - credit_history.value_no_credits_all_paid
+          - credit_history.value_all_paid
+        rationale: Both official meanings indicate no currently adverse repayment record.
+      - id: credit_history.value_no_credits_all_paid
+        kind: leaf
+        label: No credits taken or all credits paid duly
+        parent: credit_history.no_or_fully_paid_prior_credit
+        leaf_count: 1
+        leaf_values_compressed:
+          - no credits/all paid
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: no credits/all paid
+      - id: credit_history.value_all_paid
+        kind: leaf
+        label: All credits at this bank paid duly
+        parent: credit_history.no_or_fully_paid_prior_credit
+        leaf_count: 1
+        leaf_values_compressed:
+          - all paid
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: all paid
+      - id: credit_history.value_existing_paid
+        kind: leaf
+        label: Existing credits paid back duly till now
+        parent: credit_history.no_adverse_history
+        leaf_count: 1
+        leaf_values_compressed:
+          - existing paid
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: existing paid
+      - id: credit_history.adverse_or_critical_history
+        kind: internal
+        label: Adverse or critical credit history
+        parent: credit_history.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - delayed previously
+          - critical/other existing credit
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - credit_history.value_delayed_previously
+          - credit_history.value_critical_other_existing_credit
+        rationale: Official meanings indicate past delay or critical/other external credit exposure.
+      - id: credit_history.value_delayed_previously
+        kind: leaf
+        label: Delayed payment in the past
+        parent: credit_history.adverse_or_critical_history
+        leaf_count: 1
+        leaf_values_compressed:
+          - delayed previously
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: delayed previously
+      - id: credit_history.value_critical_other_existing_credit
+        kind: leaf
+        label: Critical account or other existing credit
+        parent: credit_history.adverse_or_critical_history
+        leaf_count: 1
+        leaf_values_compressed:
+          - critical/other existing credit
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: critical/other existing credit
+  purpose:
+    attribute: purpose
+    attribute_type: code
+    root: purpose.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        business: 'A49: business'
+        domestic appliance: 'A44: domestic appliances'
+        education: 'A46: education'
+        furniture/equipment: 'A42: furniture or equipment'
+        new car: 'A40: car, new'
+        other: 'A410: others'
+        radio/tv: 'A43: radio or television'
+        repairs: 'A45: repairs'
+        retraining: 'A48: retraining'
+        used car: 'A41: car, used'
+        vacation: 'A47: vacation; UCI notes this category as vacation and indicates it does not exist in the original data'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - The UCI codebook labels A47 as vacation and notes that it does not exist in the original data; it is observed in this BNG domain and therefore kept as a leaf.
+    nodes:
+      - id: purpose.ANY
+        kind: root
+        label: Any loan purpose
+        parent: null
+        leaf_count: 11
+        leaf_values_compressed:
+          - new car
+          - used car
+          - furniture/equipment
+          - radio/tv
+          - domestic appliance
+          - repairs
+          - education
+          - retraining
+          - business
+          - vacation
+          - other
+        depth_from_root: 0
+        height_from_leaf: 3
+        children:
+          - purpose.vehicle
+          - purpose.household_goods_and_repairs
+          - purpose.education_and_training
+          - purpose.value_business
+          - purpose.other_or_leisure
+      - id: purpose.vehicle
+        kind: internal
+        label: Vehicle purchase
+        parent: purpose.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - new car
+          - used car
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - purpose.value_new_car
+          - purpose.value_used_car
+        rationale: Both leaves are official car-purchase purposes.
+      - id: purpose.value_new_car
+        kind: leaf
+        label: New car
+        parent: purpose.vehicle
+        leaf_count: 1
+        leaf_values_compressed:
+          - new car
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: new car
+      - id: purpose.value_used_car
+        kind: leaf
+        label: Used car
+        parent: purpose.vehicle
+        leaf_count: 1
+        leaf_values_compressed:
+          - used car
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: used car
+      - id: purpose.household_goods_and_repairs
+        kind: internal
+        label: Household goods and repairs
+        parent: purpose.ANY
+        leaf_count: 4
+        leaf_values_compressed:
+          - furniture/equipment
+          - radio/tv
+          - domestic appliance
+          - repairs
+        depth_from_root: 1
+        height_from_leaf: 2
+        children:
+          - purpose.durable_goods
+          - purpose.value_repairs
+        rationale: Official meanings relate to household consumption, goods, or upkeep.
+      - id: purpose.durable_goods
+        kind: internal
+        label: Household durable goods
+        parent: purpose.household_goods_and_repairs
+        leaf_count: 3
+        leaf_values_compressed:
+          - furniture/equipment
+          - radio/tv
+          - domestic appliance
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - purpose.value_furniture_equipment
+          - purpose.value_radio_tv
+          - purpose.value_domestic_appliance
+        rationale: Official meanings are household durable-goods purchases.
+      - id: purpose.value_furniture_equipment
+        kind: leaf
+        label: Furniture or equipment
+        parent: purpose.durable_goods
+        leaf_count: 1
+        leaf_values_compressed:
+          - furniture/equipment
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: furniture/equipment
+      - id: purpose.value_radio_tv
+        kind: leaf
+        label: Radio or television
+        parent: purpose.durable_goods
+        leaf_count: 1
+        leaf_values_compressed:
+          - radio/tv
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: radio/tv
+      - id: purpose.value_domestic_appliance
+        kind: leaf
+        label: Domestic appliances
+        parent: purpose.durable_goods
+        leaf_count: 1
+        leaf_values_compressed:
+          - domestic appliance
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: domestic appliance
+      - id: purpose.value_repairs
+        kind: leaf
+        label: Repairs
+        parent: purpose.household_goods_and_repairs
+        leaf_count: 1
+        leaf_values_compressed:
+          - repairs
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: repairs
+      - id: purpose.education_and_training
+        kind: internal
+        label: Education and training
+        parent: purpose.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - education
+          - retraining
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - purpose.value_education
+          - purpose.value_retraining
+        rationale: Both official meanings are human-capital purposes.
+      - id: purpose.value_education
+        kind: leaf
+        label: Education
+        parent: purpose.education_and_training
+        leaf_count: 1
+        leaf_values_compressed:
+          - education
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: education
+      - id: purpose.value_retraining
+        kind: leaf
+        label: Retraining
+        parent: purpose.education_and_training
+        leaf_count: 1
+        leaf_values_compressed:
+          - retraining
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: retraining
+      - id: purpose.value_business
+        kind: leaf
+        label: Business
+        parent: purpose.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - business
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: business
+      - id: purpose.other_or_leisure
+        kind: internal
+        label: Other or leisure purpose
+        parent: purpose.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - vacation
+          - other
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - purpose.value_vacation
+          - purpose.value_other
+        rationale: Official meanings are not core purchase, household, education, or business categories.
+      - id: purpose.value_vacation
+        kind: leaf
+        label: Vacation
+        parent: purpose.other_or_leisure
+        leaf_count: 1
+        leaf_values_compressed:
+          - vacation
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: vacation
+      - id: purpose.value_other
+        kind: leaf
+        label: Other purpose
+        parent: purpose.other_or_leisure
+        leaf_count: 1
+        leaf_values_compressed:
+          - other
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: other
+  credit_amount:
+    attribute: credit_amount
+    attribute_type: continuous
+    root: credit_amount.ANY
+    source:
+      rule: Expand the exported real-valued observed range to the integer amount set ceil(low) through floor(high); group positive amounts by exposure magnitude while retaining non-positive generated values.
+    notes:
+      - Continuous exported range expanded to integers -5997 through 22001 using ceil(low) and floor(high).
+      - Negative and zero amounts are retained as observed generated-domain values.
+    nodes:
+      - id: credit_amount.ANY
+        kind: root
+        label: Any integer credit amount
+        parent: null
+        leaf_count: 27999
+        leaf_values_compressed:
+          - -5997 ~ 22001
+        depth_from_root: 0
+        height_from_leaf: 3
+        children:
+          - credit_amount.value_non_positive
+          - credit_amount.positive_amount
+      - id: credit_amount.value_non_positive
+        kind: leaf
+        label: Non-positive generated credit amount
+        parent: credit_amount.ANY
+        leaf_count: 5998
+        leaf_values_compressed:
+          - -5997 ~ 0
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: -5997 ~ 0
+      - id: credit_amount.positive_amount
+        kind: internal
+        label: Positive credit amount
+        parent: credit_amount.ANY
+        leaf_count: 22001
+        leaf_values_compressed:
+          - 1 ~ 22001
+        depth_from_root: 1
+        height_from_leaf: 2
+        children:
+          - credit_amount.small_amount
+          - credit_amount.moderate_amount
+          - credit_amount.high_amount
+        rationale: Positive principal amounts grouped by exposure magnitude.
+      - id: credit_amount.small_amount
+        kind: internal
+        label: Small credit amount
+        parent: credit_amount.positive_amount
+        leaf_count: 2499
+        leaf_values_compressed:
+          - 1 ~ 2499
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - credit_amount.value_1_to_999
+          - credit_amount.value_1000_to_2499
+        rationale: Lower principal amounts have similar exposure semantics.
+      - id: credit_amount.value_1_to_999
+        kind: leaf
+        label: Very small credit amount
+        parent: credit_amount.small_amount
+        leaf_count: 999
+        leaf_values_compressed:
+          - 1 ~ 999
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 1 ~ 999
+      - id: credit_amount.value_1000_to_2499
+        kind: leaf
+        label: Small credit amount
+        parent: credit_amount.small_amount
+        leaf_count: 1500
+        leaf_values_compressed:
+          - 1000 ~ 2499
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 1000 ~ 2499
+      - id: credit_amount.moderate_amount
+        kind: internal
+        label: Moderate credit amount
+        parent: credit_amount.positive_amount
+        leaf_count: 7500
+        leaf_values_compressed:
+          - 2500 ~ 9999
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - credit_amount.value_2500_to_4999
+          - credit_amount.value_5000_to_9999
+        rationale: Mid-range principal amounts preserve exposure magnitude.
+      - id: credit_amount.value_2500_to_4999
+        kind: leaf
+        label: Moderate credit amount
+        parent: credit_amount.moderate_amount
+        leaf_count: 2500
+        leaf_values_compressed:
+          - 2500 ~ 4999
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 2500 ~ 4999
+      - id: credit_amount.value_5000_to_9999
+        kind: leaf
+        label: Large credit amount
+        parent: credit_amount.moderate_amount
+        leaf_count: 5000
+        leaf_values_compressed:
+          - 5000 ~ 9999
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 5000 ~ 9999
+      - id: credit_amount.high_amount
+        kind: internal
+        label: High credit amount
+        parent: credit_amount.positive_amount
+        leaf_count: 12002
+        leaf_values_compressed:
+          - 10000 ~ 22001
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - credit_amount.value_10000_to_14999
+          - credit_amount.value_15000_to_22001
+        rationale: High principal amounts carry stronger credit-exposure signal.
+      - id: credit_amount.value_10000_to_14999
+        kind: leaf
+        label: Very large credit amount
+        parent: credit_amount.high_amount
+        leaf_count: 5000
+        leaf_values_compressed:
+          - 10000 ~ 14999
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 10000 ~ 14999
+      - id: credit_amount.value_15000_to_22001
+        kind: leaf
+        label: Extreme credit amount
+        parent: credit_amount.high_amount
+        leaf_count: 7002
+        leaf_values_compressed:
+          - 15000 ~ 22001
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 15000 ~ 22001
+  savings_status:
+    attribute: savings_status
+    attribute_type: code
+    root: savings_status.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        100<=X<500: 'A62: savings account or bonds total is 100 <= balance < 500 DM'
+        500<=X<1000: 'A63: savings account or bonds total is 500 <= balance < 1000 DM'
+        <100: 'A61: savings account or bonds total is balance < 100 DM'
+        '>=1000': 'A64: savings account or bonds total is balance >= 1000 DM'
+        no known savings: 'A65: unknown or no savings account'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Groups preserve reserve/liquidity signal relevant to credit-risk prediction.
+    nodes:
+      - id: savings_status.ANY
+        kind: root
+        label: Any savings-account status
+        parent: null
+        leaf_count: 5
+        leaf_values_compressed:
+          - <100
+          - 100<=X<500
+          - 500<=X<1000
+          - '>=1000'
+          - no known savings
+        depth_from_root: 0
+        height_from_leaf: 3
+        children:
+          - savings_status.known_savings
+          - savings_status.value_no_known_savings
+      - id: savings_status.known_savings
+        kind: internal
+        label: Known savings account or bonds balance
+        parent: savings_status.ANY
+        leaf_count: 4
+        leaf_values_compressed:
+          - <100
+          - 100<=X<500
+          - 500<=X<1000
+          - '>=1000'
+        depth_from_root: 1
+        height_from_leaf: 2
+        children:
+          - savings_status.low_savings
+          - savings_status.medium_high_savings
+        rationale: Official meanings report a known savings account or bond balance.
+      - id: savings_status.low_savings
+        kind: internal
+        label: Low savings
+        parent: savings_status.known_savings
+        leaf_count: 2
+        leaf_values_compressed:
+          - <100
+          - 100<=X<500
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - savings_status.value_lt_100
+          - savings_status.value_100_to_500
+        rationale: Official balance bands indicate lower liquid reserves.
+      - id: savings_status.value_lt_100
+        kind: leaf
+        label: Savings below 100 DM
+        parent: savings_status.low_savings
+        leaf_count: 1
+        leaf_values_compressed:
+          - <100
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: <100
+      - id: savings_status.value_100_to_500
+        kind: leaf
+        label: Savings 100 to below 500 DM
+        parent: savings_status.low_savings
+        leaf_count: 1
+        leaf_values_compressed:
+          - 100<=X<500
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 100<=X<500
+      - id: savings_status.medium_high_savings
+        kind: internal
+        label: Medium to high savings
+        parent: savings_status.known_savings
+        leaf_count: 2
+        leaf_values_compressed:
+          - 500<=X<1000
+          - '>=1000'
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - savings_status.value_500_to_1000
+          - savings_status.value_1000_plus
+        rationale: Official balance bands indicate stronger liquid reserves.
+      - id: savings_status.value_500_to_1000
+        kind: leaf
+        label: Savings 500 to below 1000 DM
+        parent: savings_status.medium_high_savings
+        leaf_count: 1
+        leaf_values_compressed:
+          - 500<=X<1000
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 500<=X<1000
+      - id: savings_status.value_1000_plus
+        kind: leaf
+        label: Savings at least 1000 DM
+        parent: savings_status.medium_high_savings
+        leaf_count: 1
+        leaf_values_compressed:
+          - '>=1000'
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: '>=1000'
+      - id: savings_status.value_no_known_savings
+        kind: leaf
+        label: Unknown or no savings account
+        parent: savings_status.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - no known savings
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: no known savings
+  employment:
+    attribute: employment
+    attribute_type: code
+    root: employment.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        1<=X<4: 'A73: present employment duration is 1 <= years < 4'
+        4<=X<7: 'A74: present employment duration is 4 <= years < 7'
+        <1: 'A72: present employment duration is less than 1 year'
+        '>=7': 'A75: present employment duration is at least 7 years'
+        unemployed: 'A71: unemployed'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Groups preserve employment-stability signal from the UCI tenure bands.
+    nodes:
+      - id: employment.ANY
+        kind: root
+        label: Any employment status
+        parent: null
+        leaf_count: 5
+        leaf_values_compressed:
+          - unemployed
+          - <1
+          - 1<=X<4
+          - 4<=X<7
+          - '>=7'
+        depth_from_root: 0
+        height_from_leaf: 3
+        children:
+          - employment.value_unemployed
+          - employment.employed
+      - id: employment.value_unemployed
+        kind: leaf
+        label: Unemployed
+        parent: employment.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - unemployed
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: unemployed
+      - id: employment.employed
+        kind: internal
+        label: Employed
+        parent: employment.ANY
+        leaf_count: 4
+        leaf_values_compressed:
+          - <1
+          - 1<=X<4
+          - 4<=X<7
+          - '>=7'
+        depth_from_root: 1
+        height_from_leaf: 2
+        children:
+          - employment.short_to_moderate_tenure
+          - employment.long_tenure
+        rationale: Official meanings indicate current employment with tenure bands.
+      - id: employment.short_to_moderate_tenure
+        kind: internal
+        label: Short to moderate employment tenure
+        parent: employment.employed
+        leaf_count: 2
+        leaf_values_compressed:
+          - <1
+          - 1<=X<4
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - employment.value_lt_1
+          - employment.value_1_to_4
+        rationale: Official tenure bands indicate limited tenure.
+      - id: employment.value_lt_1
+        kind: leaf
+        label: Employed less than 1 year
+        parent: employment.short_to_moderate_tenure
+        leaf_count: 1
+        leaf_values_compressed:
+          - <1
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: <1
+      - id: employment.value_1_to_4
+        kind: leaf
+        label: Employed 1 to below 4 years
+        parent: employment.short_to_moderate_tenure
+        leaf_count: 1
+        leaf_values_compressed:
+          - 1<=X<4
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 1<=X<4
+      - id: employment.long_tenure
+        kind: internal
+        label: Long employment tenure
+        parent: employment.employed
+        leaf_count: 2
+        leaf_values_compressed:
+          - 4<=X<7
+          - '>=7'
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - employment.value_4_to_7
+          - employment.value_7_plus
+        rationale: Official tenure bands indicate higher employment stability.
+      - id: employment.value_4_to_7
+        kind: leaf
+        label: Employed 4 to below 7 years
+        parent: employment.long_tenure
+        leaf_count: 1
+        leaf_values_compressed:
+          - 4<=X<7
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: 4<=X<7
+      - id: employment.value_7_plus
+        kind: leaf
+        label: Employed at least 7 years
+        parent: employment.long_tenure
+        leaf_count: 1
+        leaf_values_compressed:
+          - '>=7'
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: '>=7'
+  installment_commitment:
+    attribute: installment_commitment
+    attribute_type: continuous
+    root: installment_commitment.ANY
+    source:
+      rule: Treat integer categories 1 through 4 as ordered burden levels and group into lower versus higher commitment.
+    notes:
+      - Export labels this attribute continuous, but observed domain is integer categories 1 through 4.
+    nodes:
+      - id: installment_commitment.ANY
+        kind: root
+        label: Any installment-rate category
+        parent: null
+        leaf_count: 4
+        leaf_values_compressed:
+          - 1 ~ 4
+        depth_from_root: 0
+        height_from_leaf: 2
+        children:
+          - installment_commitment.low_commitment
+          - installment_commitment.high_commitment
+      - id: installment_commitment.low_commitment
+        kind: internal
+        label: Lower installment commitment
+        parent: installment_commitment.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - 1 ~ 2
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - installment_commitment.value_1
+          - installment_commitment.value_2
+        rationale: Lower categories imply smaller percentage burden.
+      - id: installment_commitment.value_1
+        kind: leaf
+        label: Installment commitment 1
+        parent: installment_commitment.low_commitment
+        leaf_count: 1
+        leaf_values_compressed:
+          - 1 ~ 1
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 1 ~ 1
+      - id: installment_commitment.value_2
+        kind: leaf
+        label: Installment commitment 2
+        parent: installment_commitment.low_commitment
+        leaf_count: 1
+        leaf_values_compressed:
+          - 2 ~ 2
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 2 ~ 2
+      - id: installment_commitment.high_commitment
+        kind: internal
+        label: Higher installment commitment
+        parent: installment_commitment.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - 3 ~ 4
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - installment_commitment.value_3
+          - installment_commitment.value_4
+        rationale: Higher categories imply larger percentage burden.
+      - id: installment_commitment.value_3
+        kind: leaf
+        label: Installment commitment 3
+        parent: installment_commitment.high_commitment
+        leaf_count: 1
+        leaf_values_compressed:
+          - 3 ~ 3
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 3 ~ 3
+      - id: installment_commitment.value_4
+        kind: leaf
+        label: Installment commitment 4
+        parent: installment_commitment.high_commitment
+        leaf_count: 1
+        leaf_values_compressed:
+          - 4 ~ 4
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 4 ~ 4
+  personal_status:
+    attribute: personal_status
+    attribute_type: code
+    root: personal_status.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        female div/dep/mar: 'A92: female, divorced/separated/married'
+        female single: 'A95: female, single'
+        male div/sep: 'A91: male, divorced/separated'
+        male mar/wid: 'A94: male, married/widowed'
+        male single: 'A93: male, single'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Attribute combines personal/marital status and sex; grouping prioritizes marital-status semantics while retaining sex-specific leaves.
+    nodes:
+      - id: personal_status.ANY
+        kind: root
+        label: Any personal status and sex
+        parent: null
+        leaf_count: 5
+        leaf_values_compressed:
+          - female single
+          - male single
+          - female div/dep/mar
+          - male div/sep
+          - male mar/wid
+        depth_from_root: 0
+        height_from_leaf: 3
+        children:
+          - personal_status.single
+          - personal_status.non_single_or_formerly_married
+      - id: personal_status.single
+        kind: internal
+        label: Single
+        parent: personal_status.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - female single
+          - male single
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - personal_status.value_female_single
+          - personal_status.value_male_single
+        rationale: Official meanings identify single status by sex.
+      - id: personal_status.value_female_single
+        kind: leaf
+        label: Female single
+        parent: personal_status.single
+        leaf_count: 1
+        leaf_values_compressed:
+          - female single
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: female single
+      - id: personal_status.value_male_single
+        kind: leaf
+        label: Male single
+        parent: personal_status.single
+        leaf_count: 1
+        leaf_values_compressed:
+          - male single
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: male single
+      - id: personal_status.non_single_or_formerly_married
+        kind: internal
+        label: Non-single or formerly married
+        parent: personal_status.ANY
+        leaf_count: 3
+        leaf_values_compressed:
+          - female div/dep/mar
+          - male div/sep
+          - male mar/wid
+        depth_from_root: 1
+        height_from_leaf: 2
+        children:
+          - personal_status.value_female_div_sep_mar
+          - personal_status.male_non_single
+        rationale: Official meanings indicate not-single or previously married status.
+      - id: personal_status.value_female_div_sep_mar
+        kind: leaf
+        label: Female divorced, separated, or married
+        parent: personal_status.non_single_or_formerly_married
+        leaf_count: 1
+        leaf_values_compressed:
+          - female div/dep/mar
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: female div/dep/mar
+      - id: personal_status.male_non_single
+        kind: internal
+        label: Male non-single statuses
+        parent: personal_status.non_single_or_formerly_married
+        leaf_count: 2
+        leaf_values_compressed:
+          - male div/sep
+          - male mar/wid
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - personal_status.value_male_div_sep
+          - personal_status.value_male_mar_wid
+        rationale: Official male statuses separate divorced/separated from married/widowed.
+      - id: personal_status.value_male_div_sep
+        kind: leaf
+        label: Male divorced or separated
+        parent: personal_status.male_non_single
+        leaf_count: 1
+        leaf_values_compressed:
+          - male div/sep
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: male div/sep
+      - id: personal_status.value_male_mar_wid
+        kind: leaf
+        label: Male married or widowed
+        parent: personal_status.male_non_single
+        leaf_count: 1
+        leaf_values_compressed:
+          - male mar/wid
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: male mar/wid
+  other_parties:
+    attribute: other_parties
+    attribute_type: code
+    root: other_parties.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        co applicant: 'A102: co-applicant'
+        guarantor: 'A103: guarantor'
+        none: 'A101: none'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Binary-style semantic split between no third party and third-party involvement.
+    nodes:
+      - id: other_parties.ANY
+        kind: root
+        label: Any other-debtor or guarantor status
+        parent: null
+        leaf_count: 3
+        leaf_values_compressed:
+          - none
+          - co applicant
+          - guarantor
+        depth_from_root: 0
+        height_from_leaf: 2
+        children:
+          - other_parties.value_none
+          - other_parties.third_party_involved
+      - id: other_parties.value_none
+        kind: leaf
+        label: No other debtor or guarantor
+        parent: other_parties.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - none
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: none
+      - id: other_parties.third_party_involved
+        kind: internal
+        label: Third party involved
+        parent: other_parties.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - co applicant
+          - guarantor
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - other_parties.value_co_applicant
+          - other_parties.value_guarantor
+        rationale: Official meanings indicate an additional party shares or supports credit obligation.
+      - id: other_parties.value_co_applicant
+        kind: leaf
+        label: Co-applicant
+        parent: other_parties.third_party_involved
+        leaf_count: 1
+        leaf_values_compressed:
+          - co applicant
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: co applicant
+      - id: other_parties.value_guarantor
+        kind: leaf
+        label: Guarantor
+        parent: other_parties.third_party_involved
+        leaf_count: 1
+        leaf_values_compressed:
+          - guarantor
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: guarantor
+  residence_since:
+    attribute: residence_since
+    attribute_type: continuous
+    root: residence_since.ANY
+    source:
+      rule: Treat integer categories 1 through 4 as ordered present-residence duration levels and group into shorter versus longer residence duration.
+    notes:
+      - Export labels this attribute continuous, but observed domain is integer categories 1 through 4.
+    nodes:
+      - id: residence_since.ANY
+        kind: root
+        label: Any present-residence category
+        parent: null
+        leaf_count: 4
+        leaf_values_compressed:
+          - 1 ~ 4
+        depth_from_root: 0
+        height_from_leaf: 2
+        children:
+          - residence_since.short_residence
+          - residence_since.long_residence
+      - id: residence_since.short_residence
+        kind: internal
+        label: Shorter residence duration
+        parent: residence_since.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - 1 ~ 2
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - residence_since.value_1
+          - residence_since.value_2
+        rationale: Lower categories indicate shorter present-residence duration.
+      - id: residence_since.value_1
+        kind: leaf
+        label: Residence category 1
+        parent: residence_since.short_residence
+        leaf_count: 1
+        leaf_values_compressed:
+          - 1 ~ 1
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 1 ~ 1
+      - id: residence_since.value_2
+        kind: leaf
+        label: Residence category 2
+        parent: residence_since.short_residence
+        leaf_count: 1
+        leaf_values_compressed:
+          - 2 ~ 2
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 2 ~ 2
+      - id: residence_since.long_residence
+        kind: internal
+        label: Longer residence duration
+        parent: residence_since.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - 3 ~ 4
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - residence_since.value_3
+          - residence_since.value_4
+        rationale: Higher categories indicate longer present-residence duration.
+      - id: residence_since.value_3
+        kind: leaf
+        label: Residence category 3
+        parent: residence_since.long_residence
+        leaf_count: 1
+        leaf_values_compressed:
+          - 3 ~ 3
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 3 ~ 3
+      - id: residence_since.value_4
+        kind: leaf
+        label: Residence category 4
+        parent: residence_since.long_residence
+        leaf_count: 1
+        leaf_values_compressed:
+          - 4 ~ 4
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 4 ~ 4
+  property_magnitude:
+    attribute: property_magnitude
+    attribute_type: code
+    root: property_magnitude.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        car: 'A123: car or other property, not savings account or bonds'
+        life insurance: 'A122: building society savings agreement or life insurance'
+        no known property: 'A124: unknown or no property'
+        real estate: 'A121: real estate'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Groups preserve collateral/asset-availability signal relevant to credit-risk classification.
+    nodes:
+      - id: property_magnitude.ANY
+        kind: root
+        label: Any property status
+        parent: null
+        leaf_count: 4
+        leaf_values_compressed:
+          - real estate
+          - life insurance
+          - car
+          - no known property
+        depth_from_root: 0
+        height_from_leaf: 3
+        children:
+          - property_magnitude.known_property_or_asset
+          - property_magnitude.value_no_known_property
+      - id: property_magnitude.known_property_or_asset
+        kind: internal
+        label: Known property or asset
+        parent: property_magnitude.ANY
+        leaf_count: 3
+        leaf_values_compressed:
+          - real estate
+          - life insurance
+          - car
+        depth_from_root: 1
+        height_from_leaf: 2
+        children:
+          - property_magnitude.real_or_financial_property
+          - property_magnitude.value_car
+        rationale: Official meanings indicate some known property or asset.
+      - id: property_magnitude.real_or_financial_property
+        kind: internal
+        label: Real or financial property
+        parent: property_magnitude.known_property_or_asset
+        leaf_count: 2
+        leaf_values_compressed:
+          - real estate
+          - life insurance
+        depth_from_root: 2
+        height_from_leaf: 1
+        children:
+          - property_magnitude.value_real_estate
+          - property_magnitude.value_life_insurance
+        rationale: Official meanings indicate real estate or financial-contract property.
+      - id: property_magnitude.value_real_estate
+        kind: leaf
+        label: Real estate
+        parent: property_magnitude.real_or_financial_property
+        leaf_count: 1
+        leaf_values_compressed:
+          - real estate
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: real estate
+      - id: property_magnitude.value_life_insurance
+        kind: leaf
+        label: Building society savings agreement or life insurance
+        parent: property_magnitude.real_or_financial_property
+        leaf_count: 1
+        leaf_values_compressed:
+          - life insurance
+        depth_from_root: 3
+        height_from_leaf: 0
+        children: []
+        value: life insurance
+      - id: property_magnitude.value_car
+        kind: leaf
+        label: Car or other property
+        parent: property_magnitude.known_property_or_asset
+        leaf_count: 1
+        leaf_values_compressed:
+          - car
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: car
+      - id: property_magnitude.value_no_known_property
+        kind: leaf
+        label: Unknown or no property
+        parent: property_magnitude.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - no known property
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: no known property
+  age:
+    attribute: age
+    attribute_type: continuous
+    root: age.ANY
+    source:
+      rule: Expand the exported real-valued observed range to the integer age set ceil(low) through floor(high); group into task-relevant adult life-stage intervals.
+    notes:
+      - Continuous exported range expanded to integers 17 through 90 using ceil(low) and floor(high).
+    nodes:
+      - id: age.ANY
+        kind: root
+        label: Any integer age
+        parent: null
+        leaf_count: 74
+        leaf_values_compressed:
+          - 17 ~ 90
+        depth_from_root: 0
+        height_from_leaf: 2
+        children:
+          - age.younger_working_age
+          - age.established_working_age
+          - age.older_age
+      - id: age.younger_working_age
+        kind: internal
+        label: Younger working age
+        parent: age.ANY
+        leaf_count: 18
+        leaf_values_compressed:
+          - 17 ~ 34
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - age.value_17_to_24
+          - age.value_25_to_34
+        rationale: Younger adult life stages can differ in credit-risk profile.
+      - id: age.value_17_to_24
+        kind: leaf
+        label: Young adult
+        parent: age.younger_working_age
+        leaf_count: 8
+        leaf_values_compressed:
+          - 17 ~ 24
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 17 ~ 24
+      - id: age.value_25_to_34
+        kind: leaf
+        label: Early career adult
+        parent: age.younger_working_age
+        leaf_count: 10
+        leaf_values_compressed:
+          - 25 ~ 34
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 25 ~ 34
+      - id: age.established_working_age
+        kind: internal
+        label: Established working age
+        parent: age.ANY
+        leaf_count: 20
+        leaf_values_compressed:
+          - 35 ~ 54
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - age.value_35_to_44
+          - age.value_45_to_54
+        rationale: Established working-age bands preserve income and stability signal.
+      - id: age.value_35_to_44
+        kind: leaf
+        label: Mid-career adult
+        parent: age.established_working_age
+        leaf_count: 10
+        leaf_values_compressed:
+          - 35 ~ 44
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 35 ~ 44
+      - id: age.value_45_to_54
+        kind: leaf
+        label: Mature working-age adult
+        parent: age.established_working_age
+        leaf_count: 10
+        leaf_values_compressed:
+          - 45 ~ 54
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 45 ~ 54
+      - id: age.older_age
+        kind: internal
+        label: Older age
+        parent: age.ANY
+        leaf_count: 36
+        leaf_values_compressed:
+          - 55 ~ 90
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - age.value_55_to_64
+          - age.value_65_to_90
+        rationale: Older-age bands separate pre-retirement from retirement-age profiles.
+      - id: age.value_55_to_64
+        kind: leaf
+        label: Pre-retirement age
+        parent: age.older_age
+        leaf_count: 10
+        leaf_values_compressed:
+          - 55 ~ 64
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 55 ~ 64
+      - id: age.value_65_to_90
+        kind: leaf
+        label: Older adult
+        parent: age.older_age
+        leaf_count: 26
+        leaf_values_compressed:
+          - 65 ~ 90
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 65 ~ 90
+  other_payment_plans:
+    attribute: other_payment_plans
+    attribute_type: code
+    root: other_payment_plans.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        bank: 'A141: other installment plans at bank'
+        none: 'A143: no other installment plans'
+        stores: 'A142: other installment plans at stores'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Groups preserve debt-burden semantics.
+    nodes:
+      - id: other_payment_plans.ANY
+        kind: root
+        label: Any other-payment-plan status
+        parent: null
+        leaf_count: 3
+        leaf_values_compressed:
+          - none
+          - bank
+          - stores
+        depth_from_root: 0
+        height_from_leaf: 2
+        children:
+          - other_payment_plans.value_none
+          - other_payment_plans.has_other_installment_plan
+      - id: other_payment_plans.value_none
+        kind: leaf
+        label: No other installment plans
+        parent: other_payment_plans.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - none
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: none
+      - id: other_payment_plans.has_other_installment_plan
+        kind: internal
+        label: Has other installment plan
+        parent: other_payment_plans.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - bank
+          - stores
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - other_payment_plans.value_bank
+          - other_payment_plans.value_stores
+        rationale: Official meanings identify other installment plans outside the current credit.
+      - id: other_payment_plans.value_bank
+        kind: leaf
+        label: Other plan at bank
+        parent: other_payment_plans.has_other_installment_plan
+        leaf_count: 1
+        leaf_values_compressed:
+          - bank
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: bank
+      - id: other_payment_plans.value_stores
+        kind: leaf
+        label: Other plan at stores
+        parent: other_payment_plans.has_other_installment_plan
+        leaf_count: 1
+        leaf_values_compressed:
+          - stores
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: stores
+  housing:
+    attribute: housing
+    attribute_type: code
+    root: housing.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        for free: 'A153: housing is for free'
+        own: 'A152: housing is owned'
+        rent: 'A151: housing is rented'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Groups preserve housing-tenure signal.
+    nodes:
+      - id: housing.ANY
+        kind: root
+        label: Any housing status
+        parent: null
+        leaf_count: 3
+        leaf_values_compressed:
+          - own
+          - rent
+          - for free
+        depth_from_root: 0
+        height_from_leaf: 2
+        children:
+          - housing.value_own
+          - housing.not_owned_housing
+      - id: housing.value_own
+        kind: leaf
+        label: Owned housing
+        parent: housing.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - own
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: own
+      - id: housing.not_owned_housing
+        kind: internal
+        label: Not owned housing
+        parent: housing.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - rent
+          - for free
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - housing.value_rent
+          - housing.value_for_free
+        rationale: Official meanings distinguish ownership from rent/free tenure.
+      - id: housing.value_rent
+        kind: leaf
+        label: Rented housing
+        parent: housing.not_owned_housing
+        leaf_count: 1
+        leaf_values_compressed:
+          - rent
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: rent
+      - id: housing.value_for_free
+        kind: leaf
+        label: Free housing
+        parent: housing.not_owned_housing
+        leaf_count: 1
+        leaf_values_compressed:
+          - for free
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: for free
+  existing_credits:
+    attribute: existing_credits
+    attribute_type: continuous
+    root: existing_credits.ANY
+    source:
+      rule: Treat integer counts 1 through 4 as ordered credit-exposure counts; keep 1 and 2 distinct and group 3 or more.
+    notes:
+      - Export labels this attribute continuous, but observed domain is integer counts 1 through 4.
+    nodes:
+      - id: existing_credits.ANY
+        kind: root
+        label: Any number of existing credits at this bank
+        parent: null
+        leaf_count: 4
+        leaf_values_compressed:
+          - 1 ~ 4
+        depth_from_root: 0
+        height_from_leaf: 2
+        children:
+          - existing_credits.value_1
+          - existing_credits.value_2
+          - existing_credits.multiple_existing_credits
+      - id: existing_credits.value_1
+        kind: leaf
+        label: One existing credit
+        parent: existing_credits.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - 1 ~ 1
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: 1 ~ 1
+      - id: existing_credits.value_2
+        kind: leaf
+        label: Two existing credits
+        parent: existing_credits.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - 2 ~ 2
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: 2 ~ 2
+      - id: existing_credits.multiple_existing_credits
+        kind: internal
+        label: Three or more existing credits
+        parent: existing_credits.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - 3 ~ 4
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - existing_credits.value_3
+          - existing_credits.value_4
+        rationale: Higher counts indicate greater existing bank-credit exposure.
+      - id: existing_credits.value_3
+        kind: leaf
+        label: Three existing credits
+        parent: existing_credits.multiple_existing_credits
+        leaf_count: 1
+        leaf_values_compressed:
+          - 3 ~ 3
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 3 ~ 3
+      - id: existing_credits.value_4
+        kind: leaf
+        label: Four existing credits
+        parent: existing_credits.multiple_existing_credits
+        leaf_count: 1
+        leaf_values_compressed:
+          - 4 ~ 4
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: 4 ~ 4
+  job:
+    attribute: job
+    attribute_type: code
+    root: job.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        high qualif/self emp/mgmt: 'A174: management, self-employed, highly qualified employee, or officer'
+        skilled: 'A173: skilled employee or official'
+        unemp/unskilled non res: 'A171: unemployed or unskilled non-resident'
+        unskilled resident: 'A172: unskilled resident'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Groups preserve occupational-skill and employment-seniority signal.
+    nodes:
+      - id: job.ANY
+        kind: root
+        label: Any job status
+        parent: null
+        leaf_count: 4
+        leaf_values_compressed:
+          - unemp/unskilled non res
+          - unskilled resident
+          - skilled
+          - high qualif/self emp/mgmt
+        depth_from_root: 0
+        height_from_leaf: 2
+        children:
+          - job.low_skill_or_unemployed
+          - job.skilled_or_high_qualification
+      - id: job.low_skill_or_unemployed
+        kind: internal
+        label: Unemployed or unskilled
+        parent: job.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - unemp/unskilled non res
+          - unskilled resident
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - job.value_unemp_unskilled_non_res
+          - job.value_unskilled_resident
+        rationale: Official meanings indicate unemployment or unskilled status.
+      - id: job.value_unemp_unskilled_non_res
+        kind: leaf
+        label: Unemployed or unskilled non-resident
+        parent: job.low_skill_or_unemployed
+        leaf_count: 1
+        leaf_values_compressed:
+          - unemp/unskilled non res
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: unemp/unskilled non res
+      - id: job.value_unskilled_resident
+        kind: leaf
+        label: Unskilled resident
+        parent: job.low_skill_or_unemployed
+        leaf_count: 1
+        leaf_values_compressed:
+          - unskilled resident
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: unskilled resident
+      - id: job.skilled_or_high_qualification
+        kind: internal
+        label: Skilled or high qualification
+        parent: job.ANY
+        leaf_count: 2
+        leaf_values_compressed:
+          - skilled
+          - high qualif/self emp/mgmt
+        depth_from_root: 1
+        height_from_leaf: 1
+        children:
+          - job.value_skilled
+          - job.value_high_qualif_self_emp_mgmt
+        rationale: Official meanings indicate skilled employment or higher occupational status.
+      - id: job.value_skilled
+        kind: leaf
+        label: Skilled employee or official
+        parent: job.skilled_or_high_qualification
+        leaf_count: 1
+        leaf_values_compressed:
+          - skilled
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: skilled
+      - id: job.value_high_qualif_self_emp_mgmt
+        kind: leaf
+        label: High qualification, self-employed, or management
+        parent: job.skilled_or_high_qualification
+        leaf_count: 1
+        leaf_values_compressed:
+          - high qualif/self emp/mgmt
+        depth_from_root: 2
+        height_from_leaf: 0
+        children: []
+        value: high qualif/self emp/mgmt
+  num_dependents:
+    attribute: num_dependents
+    attribute_type: continuous
+    root: num_dependents.ANY
+    source:
+      rule: Treat integer counts 1 through 2 as distinct observed leaves under the root.
+    notes:
+      - Binary integer-count attribute uses a root with two observed interval leaves.
+    nodes:
+      - id: num_dependents.ANY
+        kind: root
+        label: Any number of dependents
+        parent: null
+        leaf_count: 2
+        leaf_values_compressed:
+          - 1 ~ 2
+        depth_from_root: 0
+        height_from_leaf: 1
+        children:
+          - num_dependents.value_1
+          - num_dependents.value_2
+      - id: num_dependents.value_1
+        kind: leaf
+        label: One dependent
+        parent: num_dependents.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - 1 ~ 1
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: 1 ~ 1
+      - id: num_dependents.value_2
+        kind: leaf
+        label: Two dependents
+        parent: num_dependents.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - 2 ~ 2
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: 2 ~ 2
+  own_telephone:
+    attribute: own_telephone
+    attribute_type: code
+    root: own_telephone.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        none: 'A191: no telephone registered under the customer''s name'
+        'yes': 'A192: telephone registered under the customer''s name'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Binary attribute uses a root with two observed leaf children.
+    nodes:
+      - id: own_telephone.ANY
+        kind: root
+        label: Any registered-telephone status
+        parent: null
+        leaf_count: 2
+        leaf_values_compressed:
+          - none
+          - 'yes'
+        depth_from_root: 0
+        height_from_leaf: 1
+        children:
+          - own_telephone.value_none
+          - own_telephone.value_yes
+      - id: own_telephone.value_none
+        kind: leaf
+        label: No registered telephone
+        parent: own_telephone.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - none
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: none
+      - id: own_telephone.value_yes
+        kind: leaf
+        label: Registered telephone
+        parent: own_telephone.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - 'yes'
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: 'yes'
+  foreign_worker:
+    attribute: foreign_worker
+    attribute_type: code
+    root: foreign_worker.ANY
+    source:
+      codebook: 'UCI Machine Learning Repository: Statlog (German Credit Data)'
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      external_semantic_reference: https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data
+      code_definitions:
+        'no': 'A202: not a foreign worker'
+        'yes': 'A201: foreign worker'
+      rule: Code-value groups derive from the official UCI Statlog German Credit attribute definitions; observed credit-g labels are mapped to their corresponding UCI A-codes.
+    notes:
+      - Binary attribute uses a root with two observed leaf children.
+    nodes:
+      - id: foreign_worker.ANY
+        kind: root
+        label: Any foreign-worker status
+        parent: null
+        leaf_count: 2
+        leaf_values_compressed:
+          - 'no'
+          - 'yes'
+        depth_from_root: 0
+        height_from_leaf: 1
+        children:
+          - foreign_worker.value_no
+          - foreign_worker.value_yes
+      - id: foreign_worker.value_no
+        kind: leaf
+        label: Not a foreign worker
+        parent: foreign_worker.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - 'no'
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: 'no'
+      - id: foreign_worker.value_yes
+        kind: leaf
+        label: Foreign worker
+        parent: foreign_worker.ANY
+        leaf_count: 1
+        leaf_values_compressed:
+          - 'yes'
+        depth_from_root: 1
+        height_from_leaf: 0
+        children: []
+        value: 'yes'
+audit_summary:
+  all_coverage_ok: true
+  all_parent_links_ok: true
+  all_sibling_disjointness_ok: true
+  attributes:
+    - attribute: checking_status
+      observed_leaf_count: 4
+      tree_leaf_count: 4
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 6
+      max_height_from_leaf: 2
+    - attribute: duration
+      observed_leaf_count: 80
+      tree_leaf_count: 80
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 12
+      max_height_from_leaf: 3
+    - attribute: credit_history
+      observed_leaf_count: 5
+      tree_leaf_count: 5
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 9
+      max_height_from_leaf: 3
+    - attribute: purpose
+      observed_leaf_count: 11
+      tree_leaf_count: 11
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 17
+      max_height_from_leaf: 3
+    - attribute: credit_amount
+      observed_leaf_count: 27999
+      tree_leaf_count: 27999
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 12
+      max_height_from_leaf: 3
+    - attribute: savings_status
+      observed_leaf_count: 5
+      tree_leaf_count: 5
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 9
+      max_height_from_leaf: 3
+    - attribute: employment
+      observed_leaf_count: 5
+      tree_leaf_count: 5
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 9
+      max_height_from_leaf: 3
+    - attribute: installment_commitment
+      observed_leaf_count: 4
+      tree_leaf_count: 4
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 7
+      max_height_from_leaf: 2
+    - attribute: personal_status
+      observed_leaf_count: 5
+      tree_leaf_count: 5
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 9
+      max_height_from_leaf: 3
+    - attribute: other_parties
+      observed_leaf_count: 3
+      tree_leaf_count: 3
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 5
+      max_height_from_leaf: 2
+    - attribute: residence_since
+      observed_leaf_count: 4
+      tree_leaf_count: 4
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 7
+      max_height_from_leaf: 2
+    - attribute: property_magnitude
+      observed_leaf_count: 4
+      tree_leaf_count: 4
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 7
+      max_height_from_leaf: 3
+    - attribute: age
+      observed_leaf_count: 74
+      tree_leaf_count: 74
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 10
+      max_height_from_leaf: 2
+    - attribute: other_payment_plans
+      observed_leaf_count: 3
+      tree_leaf_count: 3
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 5
+      max_height_from_leaf: 2
+    - attribute: housing
+      observed_leaf_count: 3
+      tree_leaf_count: 3
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 5
+      max_height_from_leaf: 2
+    - attribute: existing_credits
+      observed_leaf_count: 4
+      tree_leaf_count: 4
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 6
+      max_height_from_leaf: 2
+    - attribute: job
+      observed_leaf_count: 4
+      tree_leaf_count: 4
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 7
+      max_height_from_leaf: 2
+    - attribute: num_dependents
+      observed_leaf_count: 2
+      tree_leaf_count: 2
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 3
+      max_height_from_leaf: 1
+    - attribute: own_telephone
+      observed_leaf_count: 2
+      tree_leaf_count: 2
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 3
+      max_height_from_leaf: 1
+    - attribute: foreign_worker
+      observed_leaf_count: 2
+      tree_leaf_count: 2
+      missing_leaf_values: []
+      extra_leaf_values: []
+      duplicate_leaf_values: []
+      coverage_ok: true
+      parent_link_ok: true
+      sibling_disjointness_ok: true
+      node_count: 3
+      max_height_from_leaf: 1

@@ -1,0 +1,57 @@
+# Configuration file for Exp-33. Copy it before changing parameters.
+dataset: income
+data_path: null
+generalization_tree_path: null
+results_root: results/exp33_estimation
+device: cuda
+dtype: float32
+allow_cpu_fallback: true
+seeds: [42, 43, 44, 45, 46]
+oracle_candidate_limit_per_type: 200
+
+# All roles use the same MLP family but remain independent models. The proxy
+# evaluates TRIM's Top-K candidates, the downstream model evaluates the
+# approximate-oracle pool and each method-selected action, and the estimator
+# supplies rolling MLP-LGA scores.
+model:
+  downstream:
+    family: mlp
+    hidden_sizes: [32, 32]
+    epochs: 300
+    lr: 0.01
+    weight_decay: 0.001
+  proxy:
+    family: mlp
+    hidden_sizes: [32, 32]
+    epochs: 300
+    lr: 0.01
+    weight_decay: 0.001
+  estimator:
+    family: mlp
+    hidden_sizes: [32, 32]
+    epochs: 300
+    lr: 0.01
+    weight_decay: 0.001
+
+pipeline:
+  reference_model_filtering: false
+  tolerance: 0.05
+  nrows: 200000
+  val_size: 0.15
+  test_size: 0.15
+  max_iterations: 50
+  initial_sample_fraction: 0.012
+  rank_top_k: 7
+  release_target_k: null
+
+# The same fixed-original influence representation is projected onto the
+# validation gradient here, producing Utility Delta rather than a distance.
+yang_if:
+  horizontal_last:
+    damping: 0.001
+    cg_max_iter: 50
+    cg_tolerance: 0.00001
+  vertical_all:
+    damping: 0.001
+    cg_max_iter: 50
+    cg_tolerance: 0.00001

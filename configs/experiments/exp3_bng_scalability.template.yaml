@@ -1,0 +1,53 @@
+# Configuration file for Exp-3 BNG scalability evaluation.
+experiment_id: exp3_bng_scalability
+experiment_kind: exp3_bng_scalability
+results_root: results/exp3_bng_scalability
+run_prefix: exp3_bng
+
+base_task:
+  dataset: bng
+  device: cuda
+  dtype: float32
+  allow_cpu_fallback: true
+  initial_sample_fraction: 0.01
+  report_tolerance: 0.05
+  model_name: mlp
+  model:
+    downstream:
+      family: mlp
+      hidden_sizes: [32, 32]
+      epochs: 300
+      lr: 0.01
+      weight_decay: 0.001
+    proxy:
+      family: torch_logistic
+      max_iter: 300
+    estimator:
+      family: torch_logistic
+      max_iter: 300
+  pipeline:
+    tolerance: 0.05
+    val_size: 0.15
+    test_size: 0.15
+    max_iterations: 50
+    rank_top_k: 7
+    stop_on_utility: false
+    record_iteration_test_metrics: true
+
+axes:
+  - name: nrows
+    values:
+      - {label: 120000, patch: {pipeline: {nrows: 120000}}}
+      - {label: 240000, patch: {pipeline: {nrows: 240000}}}
+      - {label: 360000, patch: {pipeline: {nrows: 360000}}}
+      - {label: 480000, patch: {pipeline: {nrows: 480000}}}
+      - {label: 600000, patch: {pipeline: {nrows: 600000}}}
+      - {label: 720000, patch: {pipeline: {nrows: 720000}}}
+      - {label: 950000, patch: {pipeline: {nrows: 950000}}}
+  - name: seed
+    values:
+      - {label: 42, patch: {pipeline: {random_state: 42}}}
+      - {label: 43, patch: {pipeline: {random_state: 43}}}
+      - {label: 44, patch: {pipeline: {random_state: 44}}}
+      - {label: 45, patch: {pipeline: {random_state: 45}}}
+      - {label: 46, patch: {pipeline: {random_state: 46}}}

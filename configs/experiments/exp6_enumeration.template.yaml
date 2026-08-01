@@ -1,0 +1,79 @@
+# Figure 5h candidate-enumeration ablation on PubCov.
+experiment_id: exp6a1_enumeration
+experiment_kind: exp6a1_enumeration
+results_root: results/exp6a1_enumeration
+run_prefix: exp6a1
+
+enumeration:
+  # Static alternatives enumerate level-0 rows once, then initialize the
+  # published state with their largest group at maximum generalization.
+  initial_generalization: max
+  kmeans:
+    n_clusters: 4
+    n_rings: 4
+    random_state: 42
+  information_loss:
+    k_ur: 10
+    merge_partner_sample_size: 64
+    merge_strategy: leaf_bucket
+    random_state: 42
+  random_split:
+    n_splits: 16
+    random_state: 42
+
+base_task:
+  dataset: pubcov
+  device: cuda
+  dtype: float32
+  allow_cpu_fallback: true
+  initial_sample_fraction: 0.012
+  model_name: xgboost
+  model:
+    downstream:
+      family: xgboost
+      n_estimators: 100
+      max_depth: 3
+      learning_rate: 0.1
+      subsample: 1.0
+      colsample_bytree: 1.0
+      reg_lambda: 1.0
+      min_child_weight: 1.0
+      tree_method: hist
+      eval_metric: logloss
+      n_jobs: 1
+      warm_start: false
+    proxy:
+      family: torch_logistic
+      max_iter: 300
+    estimator:
+      family: torch_logistic
+      max_iter: 300
+      warm_start: true
+      lbfgs_history_size: 100
+      line_search_fn: strong_wolfe
+  pipeline:
+    nrows: 152676
+    tolerance: 0.1
+    val_size: 0.15
+    test_size: 0.15
+    max_iterations: 50
+    rank_top_k: 7
+    release_target_k: null
+    stop_on_utility: true
+    record_iteration_test_metrics: true
+
+axes:
+  - name: method
+    values:
+      - {label: TRIM, patch: {method: TRIM}}
+      - {label: Sample, patch: {method: Sample, initial_sample_fraction: null}}
+      - {label: KMeans, patch: {method: KMeans, initial_sample_fraction: null}}
+      - {label: IL, patch: {method: IL, initial_sample_fraction: null}}
+      - {label: RandomSplit, patch: {method: RandomSplit, initial_sample_fraction: null}}
+  - name: seed
+    values:
+      - {label: 42, patch: {pipeline: {random_state: 42}}}
+      - {label: 43, patch: {pipeline: {random_state: 43}}}
+      - {label: 44, patch: {pipeline: {random_state: 44}}}
+      - {label: 45, patch: {pipeline: {random_state: 45}}}
+      - {label: 46, patch: {pipeline: {random_state: 46}}}

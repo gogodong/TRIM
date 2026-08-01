@@ -1,0 +1,54 @@
+# Configuration file for the Exp-5 Top-K evaluation.
+experiment_id: exp5_topk
+experiment_kind: exp5_topk
+results_root: results/exp5_topk
+run_prefix: exp5_topk
+
+base_task:
+  dataset: income
+  device: cuda
+  dtype: float32
+  allow_cpu_fallback: true
+  initial_sample_fraction: 0.03
+  model_name: mlp
+  model:
+    downstream:
+      family: mlp
+      hidden_sizes: [32, 32]
+      epochs: 300
+      lr: 0.01
+      weight_decay: 0.001
+    proxy:
+      family: torch_logistic
+      max_iter: 300
+    estimator:
+      family: torch_logistic
+      max_iter: 300
+  pipeline:
+    nrows: 120000
+    tolerance: 0.02
+    val_size: 0.15
+    test_size: 0.15
+    max_iterations: 50
+
+axes:
+  - name: top_k
+    values:
+      - {label: 2, patch: {pipeline: {rank_top_k: 2}}}
+      - {label: 3, patch: {pipeline: {rank_top_k: 3}}}
+      - {label: 5, patch: {pipeline: {rank_top_k: 5}}}
+      - {label: 7, patch: {pipeline: {rank_top_k: 7}}}
+      - {label: 9, patch: {pipeline: {rank_top_k: 9}}}
+      - {label: 11, patch: {pipeline: {rank_top_k: 11}}}
+      - {label: 13, patch: {pipeline: {rank_top_k: 13}}}
+      - {label: 15, patch: {pipeline: {rank_top_k: 15}}}
+      - {label: 17, patch: {pipeline: {rank_top_k: 17}}}
+      - {label: 19, patch: {pipeline: {rank_top_k: 19}}}
+      - {label: 20, patch: {pipeline: {rank_top_k: 20}}}
+  - name: seed
+    values:
+      - {label: 42, patch: {pipeline: {random_state: 42}}}
+      - {label: 43, patch: {pipeline: {random_state: 43}}}
+      - {label: 44, patch: {pipeline: {random_state: 44}}}
+      - {label: 45, patch: {pipeline: {random_state: 45}}}
+      - {label: 46, patch: {pipeline: {random_state: 46}}}

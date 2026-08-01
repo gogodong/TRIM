@@ -1,0 +1,969 @@
+schema_version: bank_marketing_generalization_tree.v1
+generated_at: '2026-06-19T09:55:13Z'
+dataset:
+  name: bank_marketing
+  qi_attributes:
+  - age
+  - job
+  - marital
+  - education
+  - housing
+  - loan
+  - month
+  source_reference:
+    name: UCI Machine Learning Repository Bank Marketing
+    publisher: UCI Machine Learning Repository
+    url: https://archive.ics.uci.edu/dataset/222/bank%2Bmarketing
+    citation: Moro, S., Rita, P., and Cortez, P. Bank Marketing. UCI Machine Learning Repository.
+audit_policy:
+  leaf_domain: Only values observed in the QI value-domain export are included as leaves.
+  required_checks:
+  - coverage
+  - parent_link_consistency
+  - sibling_disjointness
+  coverage_expectation: Each observed value appears as exactly one leaf in its attribute tree.
+  continuous_coverage: For a continuous attribute, interval leaves cover the observed integer domain; categorical attributes are checked one observed value per leaf.
+attribute_observed_domains:
+  age:
+    attribute_type: continuous
+    observed_count: 77
+    observed_values_compressed: 18 ~ 90, 92 ~ 95
+  job:
+    attribute_type: code
+    observed_count: 12
+    observed_values:
+    - admin.
+    - blue-collar
+    - entrepreneur
+    - housemaid
+    - management
+    - retired
+    - self-employed
+    - services
+    - student
+    - technician
+    - unemployed
+    - unknown
+  marital:
+    attribute_type: code
+    observed_count: 3
+    observed_values:
+    - divorced
+    - married
+    - single
+  education:
+    attribute_type: code
+    observed_count: 4
+    observed_values:
+    - primary
+    - secondary
+    - tertiary
+    - unknown
+  housing:
+    attribute_type: code
+    observed_count: 2
+    observed_values:
+    - 'no'
+    - 'yes'
+  loan:
+    attribute_type: code
+    observed_count: 2
+    observed_values:
+    - 'no'
+    - 'yes'
+  month:
+    attribute_type: code
+    observed_count: 12
+    observed_values:
+    - apr
+    - aug
+    - dec
+    - feb
+    - jan
+    - jul
+    - jun
+    - mar
+    - may
+    - nov
+    - oct
+    - sep
+trees:
+  age:
+    attribute: age
+    attribute_type: continuous
+    root: age.ANY
+    source:
+      rule: Continuous ages are grouped into adult life-stage intervals over the observed integer ages.
+    notes:
+    - The markdown export displays age as 18 ~ 95 with observed_count 77; the source bank-full.csv has no observed age 91, so leaf intervals avoid adding age 91 as a leaf value.
+    - Continuous interval leaves use closed integer intervals.
+    nodes:
+    - id: age.ANY
+      kind: root
+      label: Any observed age
+      parent: null
+      leaf_count: 77
+      leaf_values_compressed: 18 ~ 90, 92 ~ 95
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - age.young_adult
+      - age.prime_working_age
+      - age.older_working_and_retirement_age
+    - id: age.young_adult
+      kind: leaf
+      label: Ages 18 through 24
+      parent: age.ANY
+      leaf_count: 7
+      leaf_values_compressed: 18 ~ 24
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 18 ~ 24
+    - id: age.prime_working_age
+      kind: internal
+      label: Prime working age
+      parent: age.ANY
+      leaf_count: 30
+      leaf_values_compressed: 25 ~ 34, 35 ~ 44, 45 ~ 54
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Groups observed ages commonly treated as early, middle, and later prime working-age adults.
+      children:
+      - age.age_25_34
+      - age.age_35_44
+      - age.age_45_54
+    - id: age.age_25_34
+      kind: leaf
+      label: Ages 25 through 34
+      parent: age.prime_working_age
+      leaf_count: 10
+      leaf_values_compressed: 25 ~ 34
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 25 ~ 34
+    - id: age.age_35_44
+      kind: leaf
+      label: Ages 35 through 44
+      parent: age.prime_working_age
+      leaf_count: 10
+      leaf_values_compressed: 35 ~ 44
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 35 ~ 44
+    - id: age.age_45_54
+      kind: leaf
+      label: Ages 45 through 54
+      parent: age.prime_working_age
+      leaf_count: 10
+      leaf_values_compressed: 45 ~ 54
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 45 ~ 54
+    - id: age.older_working_and_retirement_age
+      kind: internal
+      label: Older working and retirement age
+      parent: age.ANY
+      leaf_count: 40
+      leaf_values_compressed: 55 ~ 64, 65 ~ 74, 75 ~ 84, 85 ~ 90, 92 ~ 95
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Groups observed ages from late working age through the oldest observed customers.
+      children:
+      - age.age_55_64
+      - age.age_65_74
+      - age.age_75_84
+      - age.age_85_90
+      - age.age_92_95
+    - id: age.age_55_64
+      kind: leaf
+      label: Ages 55 through 64
+      parent: age.older_working_and_retirement_age
+      leaf_count: 10
+      leaf_values_compressed: 55 ~ 64
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 55 ~ 64
+    - id: age.age_65_74
+      kind: leaf
+      label: Ages 65 through 74
+      parent: age.older_working_and_retirement_age
+      leaf_count: 10
+      leaf_values_compressed: 65 ~ 74
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 65 ~ 74
+    - id: age.age_75_84
+      kind: leaf
+      label: Ages 75 through 84
+      parent: age.older_working_and_retirement_age
+      leaf_count: 10
+      leaf_values_compressed: 75 ~ 84
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 75 ~ 84
+    - id: age.age_85_90
+      kind: leaf
+      label: Ages 85 through 90
+      parent: age.older_working_and_retirement_age
+      leaf_count: 6
+      leaf_values_compressed: 85 ~ 90
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 85 ~ 90
+    - id: age.age_92_95
+      kind: leaf
+      label: Ages 92 through 95
+      parent: age.older_working_and_retirement_age
+      leaf_count: 4
+      leaf_values_compressed: 92 ~ 95
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 92 ~ 95
+  job:
+    attribute: job
+    attribute_type: code
+    root: job.ANY
+    source:
+      codebook: UCI Machine Learning Repository Bank Marketing variable information
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/222/bank%2Bmarketing
+      external_semantic_reference: UCI Bank Marketing additional variable information
+      code_definitions:
+        admin.: Administrative occupation
+        blue-collar: Blue-collar occupation
+        entrepreneur: Entrepreneur occupation
+        housemaid: Housemaid occupation
+        management: Management occupation
+        retired: Retired
+        self-employed: Self-employed
+        services: Services occupation
+        student: Student
+        technician: Technician occupation
+        unemployed: Unemployed
+        unknown: Unknown occupation
+      rule: Occupation codes are grouped by broad labor-market role; unknown remains standalone.
+    notes:
+    - Code meanings were confirmed from the UCI Bank Marketing variable information.
+    nodes:
+    - id: job.ANY
+      kind: root
+      label: Any observed job
+      parent: null
+      leaf_count: 12
+      leaf_values_compressed: admin., blue-collar, entrepreneur, housemaid, management, retired, self-employed, services, student, technician, unemployed, unknown
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - job.administrative_business
+      - job.manual_service_technical
+      - job.not_currently_employed
+      - job.value_unknown
+    - id: job.administrative_business
+      kind: internal
+      label: Administrative, business, and self-directed occupations
+      parent: job.ANY
+      leaf_count: 4
+      leaf_values_compressed: admin., entrepreneur, management, self-employed
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Groups office, management, business ownership, and self-directed work roles.
+      children:
+      - job.value_admin
+      - job.value_entrepreneur
+      - job.value_management
+      - job.value_self_employed
+    - id: job.value_admin
+      kind: leaf
+      label: admin.
+      parent: job.administrative_business
+      leaf_count: 1
+      leaf_values_compressed: admin.
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'admin.'
+    - id: job.value_entrepreneur
+      kind: leaf
+      label: entrepreneur
+      parent: job.administrative_business
+      leaf_count: 1
+      leaf_values_compressed: entrepreneur
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'entrepreneur'
+    - id: job.value_management
+      kind: leaf
+      label: management
+      parent: job.administrative_business
+      leaf_count: 1
+      leaf_values_compressed: management
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'management'
+    - id: job.value_self_employed
+      kind: leaf
+      label: self-employed
+      parent: job.administrative_business
+      leaf_count: 1
+      leaf_values_compressed: self-employed
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'self-employed'
+    - id: job.manual_service_technical
+      kind: internal
+      label: Manual, service, and technical occupations
+      parent: job.ANY
+      leaf_count: 4
+      leaf_values_compressed: blue-collar, housemaid, services, technician
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Groups non-management service, manual, domestic, and technical work roles.
+      children:
+      - job.value_blue_collar
+      - job.value_housemaid
+      - job.value_services
+      - job.value_technician
+    - id: job.value_blue_collar
+      kind: leaf
+      label: blue-collar
+      parent: job.manual_service_technical
+      leaf_count: 1
+      leaf_values_compressed: blue-collar
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'blue-collar'
+    - id: job.value_housemaid
+      kind: leaf
+      label: housemaid
+      parent: job.manual_service_technical
+      leaf_count: 1
+      leaf_values_compressed: housemaid
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'housemaid'
+    - id: job.value_services
+      kind: leaf
+      label: services
+      parent: job.manual_service_technical
+      leaf_count: 1
+      leaf_values_compressed: services
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'services'
+    - id: job.value_technician
+      kind: leaf
+      label: technician
+      parent: job.manual_service_technical
+      leaf_count: 1
+      leaf_values_compressed: technician
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'technician'
+    - id: job.not_currently_employed
+      kind: internal
+      label: Not currently employed or outside the active workforce
+      parent: job.ANY
+      leaf_count: 3
+      leaf_values_compressed: retired, student, unemployed
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Groups statuses that are not active paid occupations in the codebook labels.
+      children:
+      - job.value_retired
+      - job.value_student
+      - job.value_unemployed
+    - id: job.value_retired
+      kind: leaf
+      label: retired
+      parent: job.not_currently_employed
+      leaf_count: 1
+      leaf_values_compressed: retired
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'retired'
+    - id: job.value_student
+      kind: leaf
+      label: student
+      parent: job.not_currently_employed
+      leaf_count: 1
+      leaf_values_compressed: student
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'student'
+    - id: job.value_unemployed
+      kind: leaf
+      label: unemployed
+      parent: job.not_currently_employed
+      leaf_count: 1
+      leaf_values_compressed: unemployed
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'unemployed'
+    - id: job.value_unknown
+      kind: leaf
+      label: unknown
+      parent: job.ANY
+      leaf_count: 1
+      leaf_values_compressed: unknown
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 'unknown'
+  marital:
+    attribute: marital
+    attribute_type: code
+    root: marital.ANY
+    source:
+      codebook: UCI Machine Learning Repository Bank Marketing variable information
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/222/bank%2Bmarketing
+      external_semantic_reference: UCI Bank Marketing additional variable information
+      code_definitions:
+        divorced: Divorced or widowed
+        married: Married
+        single: Single
+      rule: Marital codes are grouped by current married status, with single and formerly married kept distinct.
+    notes:
+    - UCI notes that divorced means divorced or widowed for this dataset.
+    nodes:
+    - id: marital.ANY
+      kind: root
+      label: Any observed marital status
+      parent: null
+      leaf_count: 3
+      leaf_values_compressed: divorced, married, single
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - marital.value_married
+      - marital.not_currently_married
+    - id: marital.value_married
+      kind: leaf
+      label: married
+      parent: marital.ANY
+      leaf_count: 1
+      leaf_values_compressed: married
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 'married'
+    - id: marital.not_currently_married
+      kind: internal
+      label: Not currently married
+      parent: marital.ANY
+      leaf_count: 2
+      leaf_values_compressed: divorced, single
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Separates customers without a current married status from married customers.
+      children:
+      - marital.value_divorced
+      - marital.value_single
+    - id: marital.value_divorced
+      kind: leaf
+      label: divorced or widowed
+      parent: marital.not_currently_married
+      leaf_count: 1
+      leaf_values_compressed: divorced
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'divorced'
+    - id: marital.value_single
+      kind: leaf
+      label: single
+      parent: marital.not_currently_married
+      leaf_count: 1
+      leaf_values_compressed: single
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'single'
+  education:
+    attribute: education
+    attribute_type: code
+    root: education.ANY
+    source:
+      codebook: UCI Machine Learning Repository Bank Marketing variable information
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/222/bank%2Bmarketing
+      external_semantic_reference: UCI Bank Marketing additional variable information
+      code_definitions:
+        primary: Primary education
+        secondary: Secondary education
+        tertiary: Tertiary education
+        unknown: Unknown education
+      rule: Education codes are grouped by education level; unknown remains standalone.
+    notes:
+    - These are the older bank.csv and bank-full.csv education codes, not the bank-additional education codes.
+    nodes:
+    - id: education.ANY
+      kind: root
+      label: Any observed education
+      parent: null
+      leaf_count: 4
+      leaf_values_compressed: primary, secondary, tertiary, unknown
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - education.basic_or_secondary
+      - education.value_tertiary
+      - education.value_unknown
+    - id: education.basic_or_secondary
+      kind: internal
+      label: Primary or secondary education
+      parent: education.ANY
+      leaf_count: 2
+      leaf_values_compressed: primary, secondary
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Groups non-tertiary known education levels.
+      children:
+      - education.value_primary
+      - education.value_secondary
+    - id: education.value_primary
+      kind: leaf
+      label: primary
+      parent: education.basic_or_secondary
+      leaf_count: 1
+      leaf_values_compressed: primary
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'primary'
+    - id: education.value_secondary
+      kind: leaf
+      label: secondary
+      parent: education.basic_or_secondary
+      leaf_count: 1
+      leaf_values_compressed: secondary
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'secondary'
+    - id: education.value_tertiary
+      kind: leaf
+      label: tertiary
+      parent: education.ANY
+      leaf_count: 1
+      leaf_values_compressed: tertiary
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 'tertiary'
+    - id: education.value_unknown
+      kind: leaf
+      label: unknown
+      parent: education.ANY
+      leaf_count: 1
+      leaf_values_compressed: unknown
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 'unknown'
+  housing:
+    attribute: housing
+    attribute_type: code
+    root: housing.ANY
+    source:
+      codebook: UCI Machine Learning Repository Bank Marketing variable information
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/222/bank%2Bmarketing
+      external_semantic_reference: UCI Bank Marketing additional variable information
+      code_definitions:
+        'no': Does not have a housing loan
+        'yes': Has a housing loan
+      rule: Binary housing-loan indicator uses two direct leaf children.
+    notes:
+    - Binary attribute; no intermediate semantic group is needed.
+    nodes:
+    - id: housing.ANY
+      kind: root
+      label: Any observed housing-loan status
+      parent: null
+      leaf_count: 2
+      leaf_values_compressed: no, yes
+      depth_from_root: 0
+      height_from_leaf: 1
+      children:
+      - housing.value_no
+      - housing.value_yes
+    - id: housing.value_no
+      kind: leaf
+      label: no housing loan
+      parent: housing.ANY
+      leaf_count: 1
+      leaf_values_compressed: no
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 'no'
+    - id: housing.value_yes
+      kind: leaf
+      label: has housing loan
+      parent: housing.ANY
+      leaf_count: 1
+      leaf_values_compressed: yes
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 'yes'
+  loan:
+    attribute: loan
+    attribute_type: code
+    root: loan.ANY
+    source:
+      codebook: UCI Machine Learning Repository Bank Marketing variable information
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/222/bank%2Bmarketing
+      external_semantic_reference: UCI Bank Marketing additional variable information
+      code_definitions:
+        'no': Does not have a personal loan
+        'yes': Has a personal loan
+      rule: Binary personal-loan indicator uses two direct leaf children.
+    notes:
+    - Binary attribute; no intermediate semantic group is needed.
+    nodes:
+    - id: loan.ANY
+      kind: root
+      label: Any observed personal-loan status
+      parent: null
+      leaf_count: 2
+      leaf_values_compressed: no, yes
+      depth_from_root: 0
+      height_from_leaf: 1
+      children:
+      - loan.value_no
+      - loan.value_yes
+    - id: loan.value_no
+      kind: leaf
+      label: no personal loan
+      parent: loan.ANY
+      leaf_count: 1
+      leaf_values_compressed: no
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 'no'
+    - id: loan.value_yes
+      kind: leaf
+      label: has personal loan
+      parent: loan.ANY
+      leaf_count: 1
+      leaf_values_compressed: yes
+      depth_from_root: 1
+      height_from_leaf: 0
+      children: []
+      value: 'yes'
+  month:
+    attribute: month
+    attribute_type: code
+    root: month.ANY
+    source:
+      codebook: UCI Machine Learning Repository Bank Marketing variable information
+      codebook_publisher: UCI Machine Learning Repository
+      codebook_url: https://archive.ics.uci.edu/dataset/222/bank%2Bmarketing
+      external_semantic_reference: UCI Bank Marketing additional variable information
+      code_definitions:
+        jan: January last-contact month
+        feb: February last-contact month
+        mar: March last-contact month
+        apr: April last-contact month
+        may: May last-contact month
+        jun: June last-contact month
+        jul: July last-contact month
+        aug: August last-contact month
+        sep: September last-contact month
+        oct: October last-contact month
+        nov: November last-contact month
+        dec: December last-contact month
+      rule: Month codes are grouped into calendar quarters.
+    notes:
+    - Month describes the last contact month of year.
+    nodes:
+    - id: month.ANY
+      kind: root
+      label: Any observed last-contact month
+      parent: null
+      leaf_count: 12
+      leaf_values_compressed: apr, aug, dec, feb, jan, jul, jun, mar, may, nov, oct, sep
+      depth_from_root: 0
+      height_from_leaf: 2
+      children:
+      - month.q1
+      - month.q2
+      - month.q3
+      - month.q4
+    - id: month.q1
+      kind: internal
+      label: First quarter
+      parent: month.ANY
+      leaf_count: 3
+      leaf_values_compressed: jan, feb, mar
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Groups January through March last-contact months.
+      children:
+      - month.value_jan
+      - month.value_feb
+      - month.value_mar
+    - id: month.value_jan
+      kind: leaf
+      label: January
+      parent: month.q1
+      leaf_count: 1
+      leaf_values_compressed: jan
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'jan'
+    - id: month.value_feb
+      kind: leaf
+      label: February
+      parent: month.q1
+      leaf_count: 1
+      leaf_values_compressed: feb
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'feb'
+    - id: month.value_mar
+      kind: leaf
+      label: March
+      parent: month.q1
+      leaf_count: 1
+      leaf_values_compressed: mar
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'mar'
+    - id: month.q2
+      kind: internal
+      label: Second quarter
+      parent: month.ANY
+      leaf_count: 3
+      leaf_values_compressed: apr, may, jun
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Groups April through June last-contact months.
+      children:
+      - month.value_apr
+      - month.value_may
+      - month.value_jun
+    - id: month.value_apr
+      kind: leaf
+      label: April
+      parent: month.q2
+      leaf_count: 1
+      leaf_values_compressed: apr
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'apr'
+    - id: month.value_may
+      kind: leaf
+      label: May
+      parent: month.q2
+      leaf_count: 1
+      leaf_values_compressed: may
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'may'
+    - id: month.value_jun
+      kind: leaf
+      label: June
+      parent: month.q2
+      leaf_count: 1
+      leaf_values_compressed: jun
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'jun'
+    - id: month.q3
+      kind: internal
+      label: Third quarter
+      parent: month.ANY
+      leaf_count: 3
+      leaf_values_compressed: jul, aug, sep
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Groups July through September last-contact months.
+      children:
+      - month.value_jul
+      - month.value_aug
+      - month.value_sep
+    - id: month.value_jul
+      kind: leaf
+      label: July
+      parent: month.q3
+      leaf_count: 1
+      leaf_values_compressed: jul
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'jul'
+    - id: month.value_aug
+      kind: leaf
+      label: August
+      parent: month.q3
+      leaf_count: 1
+      leaf_values_compressed: aug
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'aug'
+    - id: month.value_sep
+      kind: leaf
+      label: September
+      parent: month.q3
+      leaf_count: 1
+      leaf_values_compressed: sep
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'sep'
+    - id: month.q4
+      kind: internal
+      label: Fourth quarter
+      parent: month.ANY
+      leaf_count: 3
+      leaf_values_compressed: oct, nov, dec
+      depth_from_root: 1
+      height_from_leaf: 1
+      rationale: Groups October through December last-contact months.
+      children:
+      - month.value_oct
+      - month.value_nov
+      - month.value_dec
+    - id: month.value_oct
+      kind: leaf
+      label: October
+      parent: month.q4
+      leaf_count: 1
+      leaf_values_compressed: oct
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'oct'
+    - id: month.value_nov
+      kind: leaf
+      label: November
+      parent: month.q4
+      leaf_count: 1
+      leaf_values_compressed: nov
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'nov'
+    - id: month.value_dec
+      kind: leaf
+      label: December
+      parent: month.q4
+      leaf_count: 1
+      leaf_values_compressed: dec
+      depth_from_root: 2
+      height_from_leaf: 0
+      children: []
+      value: 'dec'
+audit_summary:
+  all_coverage_ok: true
+  all_parent_links_ok: true
+  all_sibling_disjointness_ok: true
+  attributes:
+  - attribute: age
+    observed_leaf_count: 77
+    tree_leaf_count: 77
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 12
+    max_height_from_leaf: 2
+  - attribute: job
+    observed_leaf_count: 12
+    tree_leaf_count: 12
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 16
+    max_height_from_leaf: 2
+  - attribute: marital
+    observed_leaf_count: 3
+    tree_leaf_count: 3
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 5
+    max_height_from_leaf: 2
+  - attribute: education
+    observed_leaf_count: 4
+    tree_leaf_count: 4
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 6
+    max_height_from_leaf: 2
+  - attribute: housing
+    observed_leaf_count: 2
+    tree_leaf_count: 2
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 3
+    max_height_from_leaf: 1
+  - attribute: loan
+    observed_leaf_count: 2
+    tree_leaf_count: 2
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 3
+    max_height_from_leaf: 1
+  - attribute: month
+    observed_leaf_count: 12
+    tree_leaf_count: 12
+    missing_leaf_values: []
+    extra_leaf_values: []
+    duplicate_leaf_values: []
+    coverage_ok: true
+    parent_link_ok: true
+    sibling_disjointness_ok: true
+    node_count: 17
+    max_height_from_leaf: 2

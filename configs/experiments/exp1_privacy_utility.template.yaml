@@ -1,0 +1,74 @@
+# Configuration file for Exp-1 privacy-utility evaluation.
+experiment_id: exp1_privacy_utility
+experiment_kind: exp1_privacy_utility
+results_root: results/exp1_privacy_utility
+run_prefix: exp1
+
+base_task:
+  device: cuda
+  dtype: float32
+  allow_cpu_fallback: true
+  model:
+    proxy:
+      family: torch_logistic
+      max_iter: 300
+    estimator:
+      family: torch_logistic
+      max_iter: 300
+  pipeline:
+    tolerance: 0.01
+    val_size: 0.15
+    test_size: 0.15
+    max_iterations: 50
+    rank_top_k: 7
+    release_target_k: null
+    stop_on_utility: false
+    record_iteration_test_metrics: true
+
+axes:
+  - name: dataset
+    values:
+      - label: income
+        patch:
+          dataset: income
+          initial_sample_fraction: 0.012
+      - label: pubcov
+        patch:
+          dataset: pubcov
+          initial_sample_fraction: 0.012
+      - label: bm
+        patch:
+          dataset: bm
+          initial_sample_fraction: 0.012
+      - label: diabetes
+        patch:
+          dataset: diabetes
+          initial_sample_fraction: 0.012
+  - name: model
+    values:
+      - label: mlp
+        patch:
+          model_name: mlp
+          model:
+            downstream:
+              family: mlp
+              hidden_sizes: [32, 32]
+              epochs: 300
+              lr: 0.01
+              weight_decay: 0.001
+      - label: xgboost
+        patch:
+          model_name: xgboost
+          model:
+            downstream:
+              family: xgboost
+              n_estimators: 100
+              max_depth: 3
+              learning_rate: 0.1
+  - name: seed
+    values:
+      - {label: 42, patch: {pipeline: {random_state: 42}}}
+      - {label: 43, patch: {pipeline: {random_state: 43}}}
+      - {label: 44, patch: {pipeline: {random_state: 44}}}
+      - {label: 45, patch: {pipeline: {random_state: 45}}}
+      - {label: 46, patch: {pipeline: {random_state: 46}}}
