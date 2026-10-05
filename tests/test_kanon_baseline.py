@@ -14,7 +14,7 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from experiments.exp1_kanon.mondrian import FittedMondrian, HierarchySchema
+from experiments.exp1_kanon.mondrian import EVALUATION_ROUTING, LEGACY_EVALUATION_ROUTING, FittedMondrian, HierarchySchema
 from experiments.exp1_kanon.run import k_grid
 from prototype.dataloader import DiabetesReadmissionDataLoader, load_generalization_rules
 from prototype.privacy_metrics import individual_tail_risk_stats, original_equivalence_class_sizes
@@ -72,6 +72,7 @@ def test_full_coverage_k_and_original_labels(schema_factory):
             assert all(expected_leaf[position] == group["node_id"] for position in group["positions"])
         np.testing.assert_allclose(schema.encode(X, training_groups, family="mlp"), encoded)
         assert fitted.routing_stats(training_groups, len(X))["fallback_count"] == 0
+        assert fitted.routing_stats(training_groups, len(X))["widened_record_count"] == 0
     pd.testing.assert_frame_equal(X, original_X)
     pd.testing.assert_series_equal(y, original_y)
 
@@ -105,11 +106,12 @@ def test_empty_categorical_branch_uses_containing_ancestor_and_roundtrip(schema_
     assert by_row[0]["release"]["kind"]["node"] == "ab"
     assert by_row[1]["release"]["kind"]["node"] == "kind_root"
     assert by_row[2]["release"]["age"]["high"] == 7
-    assert by_row[2]["release"]["kind"]["node"] == "kind_root"
-    assert by_row[2]["node_id"] == 0
-    assert by_row[2]["stop_kind"] == "root"
+    assert by_row[2]["release"]["kind"]["node"] == "a"
+    assert by_row[2]["stop_kind"] == "leaf"
+    assert by_row[2]["widening_source_node_ids"] == {"age": 0}
     assert by_row[0]["release"]["age"] == {"low": 1.0, "high": 1.0, "missing": False}
-    assert all(group["fallback"] for group in groups)
+    assert by_row[0]["fallback"] and by_row[1]["fallback"]
+    assert not by_row[2]["fallback"]
     assert fitted.to_dict() == saved
     restored = FittedMondrian.from_dict(schema, json.loads(json.dumps(saved)))
     assert restored.transform_groups(evaluation) == groups
@@ -118,14 +120,14 @@ def test_empty_categorical_branch_uses_containing_ancestor_and_roundtrip(schema_
         assert all(schema.contains(attribute, domain, values[attribute][[position]])[0]
                    for attribute, domain in group["release"].items())
     stats = fitted.routing_stats(groups, len(evaluation))
-    assert (stats["leaf_count"], stats["internal_count"], stats["root_count"]) == (0, 2, 1)
-    assert stats["eval_coarsest_release_row_count"] == 1
-    assert stats["stop_depth_counts"]["0"] == 1
+    assert (stats["leaf_count"], stats["internal_count"], stats["root_count"]) == (1, 2, 0)
+    assert stats["leaf_widened_count"] == stats["root_widened_record_count"] == 1
+    assert stats["eval_coarsest_release_row_count"] == 0
     assert sum(stats["eval_assignment_counts"].values()) == len(evaluation)
 
 
 @pytest.mark.parametrize("variant", ["median", "infogain"])
-def test_numeric_gap_stops_at_observed_parent_instead_of_threshold_child(schema_factory, variant):
+def test_numeric_gap_routes_by_threshold_and_widens_only_age(schema_factory, variant):
     schema = schema_factory(list(range(30, 41)))
     train = pd.DataFrame({"age": [30, 34, 36, 40], "kind": ["a"] * 4, "aux": [0] * 4})
     fitted = FittedMondrian(schema, k=2, variant=variant).fit(train, pd.Series([0, 1, 0, 1]))
@@ -138,8 +140,9 @@ def test_numeric_gap_stops_at_observed_parent_instead_of_threshold_child(schema_
     assert by_row[0]["release"]["age"]["high"] == 34
     assert by_row[2]["release"]["age"]["low"] == 36
     gap = by_row[1]
-    assert gap["stop_kind"] == "internal"
-    assert fitted.nodes[gap["node_id"]]["kind"] == "numeric"
+    assert gap["stop_kind"] == "leaf"
+    assert gap["widened_attributes"] == ["age"]
+    assert fitted.nodes[gap["widening_source_node_ids"]["age"]]["kind"] == "numeric"
     assert gap["release"]["age"] == {"low": 30.0, "high": 40.0, "missing": False}
     assert gap["release"]["kind"]["node"] == "a"
     assert schema.encode(evaluation, groups, family="mlp").loc[1, "age"] == 35.0
@@ -151,7 +154,7 @@ def test_numeric_gap_stops_at_observed_parent_instead_of_threshold_child(schema_
     assert fitted.partitions == original_release
 
 
-def test_every_qi_must_fit_child_and_entire_record_uses_parent(schema_factory):
+def test_non_split_numeric_shrink_widens_aux_and_preserves_age(schema_factory):
     original = schema_factory()
     loader = original.loader
     loader.qi_attributes = ("age", "kind", "aux")
@@ -166,12 +169,104 @@ def test_every_qi_must_fit_child_and_entire_record_uses_parent(schema_factory):
     fitted = FittedMondrian(schema, k=2, variant="median").fit(train, pd.Series([0, 1, 0, 1]))
     evaluation = pd.DataFrame({"age": [0], "kind": ["a"], "aux": [7]})
     groups = fitted.transform_groups(evaluation)
-    assert len(groups) == 1 and groups[0]["stop_kind"] == "internal"
-    assert fitted.nodes[groups[0]["node_id"]]["kind"] == "numeric"
-    assert groups[0]["release"]["age"]["high"] == 7
+    assert len(groups) == 1 and groups[0]["stop_kind"] == "leaf"
+    assert groups[0]["widened_attributes"] == ["aux"]
+    assert groups[0]["release"]["age"]["high"] == 1
     assert groups[0]["release"]["aux"]["low"] == 0
     encoded = schema.encode(evaluation, groups, family="mlp")
-    assert encoded.loc[0, "age"] == encoded.loc[0, "aux"] == 3.5
+    assert encoded.loc[0, "age"] == 0.5
+    assert encoded.loc[0, "aux"] == 3.5
+
+
+def test_failing_qis_use_distinct_deepest_ancestors_on_same_path(schema_factory):
+    original = schema_factory()
+    original.loader.qi_attributes = ("age", "kind", "aux")
+    trees = deepcopy(original.generalization.trees)
+    trees["aux"] = deepcopy(trees["age"])
+    schema = HierarchySchema(load_generalization_rules(trees, original.loader, generalization_level=0))
+    train = pd.DataFrame({"age": [0, 1, 4, 5], "kind": ["a"] * 4, "aux": [0, 0, 7, 7]})
+    fitted = FittedMondrian(schema, k=2, variant="median").fit(train, pd.Series([0, 1, 0, 1]))
+    saved = deepcopy(fitted.to_dict())
+    evaluation = pd.DataFrame({"age": [7, 1, 0], "kind": ["a"] * 3, "aux": [1, 0, 0]})
+    groups = fitted.transform_groups(evaluation)
+    by_row = {position: group for group in groups for position in group["positions"]}
+    sources = by_row[0]["widening_source_node_ids"]
+    assert sources["age"] == 0
+    assert fitted.nodes[sources["aux"]]["attribute"] == "aux"
+    assert fitted.nodes[sources["aux"]]["kind"] == "numeric"
+    assert by_row[0]["release"]["kind"]["node"] == "a"
+    assert by_row[1]["widened_attributes"] == by_row[2]["widened_attributes"] == []
+    assert by_row[0]["node_id"] == by_row[1]["node_id"]
+    stats = fitted.routing_stats(groups, len(evaluation))
+    assert stats["leaf_count"] == 3 and stats["leaf_unmodified_count"] == 2
+    assert stats["widened_record_count"] == 1 and stats["widened_qi_count"] == 2
+    assert stats["attribute_widening_counts"] == {"age": 1, "aux": 1}
+    assert stats["widened_attribute_count_distribution"] == {"2": 1}
+    assert fitted.to_dict() == saved
+    for group in groups:
+        positions = group["positions"]
+        values = schema.values(evaluation)
+        for attribute, domain in group["release"].items():
+            assert schema.contains(attribute, domain, values[attribute][positions]).all()
+    for family in ("mlp", "xgboost"):
+        encoded = schema.encode(evaluation, groups, family=family)
+        assert len(encoded) == 3 and np.isfinite(np.asarray(encoded)).all()
+
+
+def test_empty_category_after_numeric_gap_uses_containing_whole_record_ancestor(schema_factory):
+    from experiments.exp1_kanon.diagnose_routing import diagnose_routing
+
+    schema = schema_factory()
+    train = pd.DataFrame({"age": [0, 1, 6, 7], "kind": ["a", "a", "c", "c"], "aux": [0] * 4})
+    fitted = FittedMondrian(schema, k=2, variant="median").fit(train, pd.Series([0, 1, 0, 1]))
+    evaluation = pd.DataFrame({"age": [3], "kind": ["c"], "aux": [99]})
+    group, = fitted.transform_groups(evaluation)
+    assert group["stop_reason"] == "unoccupied_categorical_branch"
+    assert group["node_id"] != group["routing_stop_node_id"]
+    assert group["release"]["kind"]["node"] == "kind_root"
+    assert group["release"]["age"] == {"low": 0.0, "high": 7.0, "missing": False}
+    assert group["fallback"] and group["widened_attributes"] == []
+    stats = fitted.routing_stats([group], 1)
+    assert stats["whole_record_ancestor_fallback_count"] == 1
+    report = diagnose_routing(fitted, train, evaluation)
+    assert report["policy_transition_counts"] == {"old_whole_record_stop_to_whole_record_stop": 1}
+    assert report["split_rule_with_widening_true_value_exclusion_count"] == 0
+
+
+def test_unobserved_numeric_missing_branch_stops_at_global_root(schema_factory):
+    schema = schema_factory()
+    train = pd.DataFrame({"age": [0, 1, 6, 7], "kind": ["a"] * 4, "aux": [0] * 4})
+    fitted = FittedMondrian(schema, k=2, variant="median").fit(train, pd.Series([0, 1, 0, 1]))
+    evaluation = pd.DataFrame({"age": [np.nan], "kind": ["a"], "aux": [99]})
+    group, = fitted.transform_groups(evaluation)
+    assert group["node_id"] == 0 and group["stop_kind"] == "root"
+    assert group["stop_reason"] == "unobserved_numeric_missing_branch"
+    assert group["release"] == schema.root_domain()
+
+    train = pd.concat([train, pd.DataFrame({"age": [np.nan, np.nan], "kind": ["a", "a"], "aux": [0, 0]})], ignore_index=True)
+    fitted = FittedMondrian(schema, k=2, variant="median").fit(train, pd.Series([0, 1] * 3))
+    group, = fitted.transform_groups(evaluation)
+    assert group["stop_kind"] == "leaf" and group["widened_attributes"] == []
+    assert group["release"]["age"] == {"missing_only": True}
+
+
+def test_archived_v2_release_replays_original_policy_without_silent_upgrade(schema_factory):
+    schema = schema_factory()
+    train = pd.DataFrame({"age": [0, 2, 5, 7], "kind": ["a"] * 4, "aux": [0] * 4})
+    fitted = FittedMondrian(schema, k=2, variant="median").fit(train, pd.Series([0, 1, 0, 1]))
+    evaluation = pd.DataFrame({"age": [3], "kind": ["a"], "aux": [99]})
+    payload = deepcopy(fitted.to_dict())
+    assert payload["unseen_policy"] == EVALUATION_ROUTING
+    payload.update(schema_version="hierarchy_mondrian.v2", unseen_policy=LEGACY_EVALUATION_ROUTING)
+    restored = FittedMondrian.from_dict(schema, payload)
+    assert restored.to_dict() == payload
+    old_group, = restored.transform_groups(evaluation)
+    new_group, = fitted.transform_groups(evaluation)
+    assert old_group["stop_kind"] == "internal"
+    assert new_group["stop_kind"] == "leaf" and new_group["widened_attributes"] == ["age"]
+    payload["unseen_policy"] = EVALUATION_ROUTING
+    with pytest.raises(ValueError, match="policy disagree"):
+        FittedMondrian.from_dict(schema, payload)
 
 
 def test_unsplit_training_leaf_remains_distinct_from_global_root(schema_factory):
@@ -187,10 +282,11 @@ def test_unsplit_training_leaf_remains_distinct_from_global_root(schema_factory)
     groups = fitted.transform_groups(evaluation)
     by_row = {position: group for group in groups for position in group["positions"]}
     assert by_row[0]["stop_kind"] == "leaf"
-    assert by_row[1]["stop_kind"] == "root"
-    assert by_row[1]["release"] == schema.root_domain()
+    assert by_row[1]["stop_kind"] == "leaf"
+    assert by_row[1]["release"]["age"] == schema.root_domain()["age"]
+    assert by_row[1]["widened_attributes"] == ["age"]
     saved = fitted.to_dict()
-    assert saved["schema_version"] == "hierarchy_mondrian.v2"
+    assert saved["schema_version"] == "hierarchy_mondrian.v3"
     saved["schema_version"] = "hierarchy_mondrian.v1"
     with pytest.raises(ValueError, match="Unsupported"):
         FittedMondrian.from_dict(schema, saved)
@@ -209,10 +305,11 @@ def test_root_fallback_retains_numeric_root_height_in_a_unary_hierarchy(schema_f
     fitted = FittedMondrian(schema, k=2, variant="median").fit(train, pd.Series([0, 1, 0, 1]))
     evaluation = pd.DataFrame({"age": [7], "kind": ["a"], "aux": [99]})
     groups = fitted.transform_groups(evaluation)
-    assert groups[0]["stop_kind"] == "root"
+    assert groups[0]["stop_kind"] == "leaf"
+    assert groups[0]["widening_source_node_ids"] == {"age": 0}
     np.testing.assert_allclose(
         schema.encode(evaluation, groups, family="xgboost"),
-        generalization.change_level({"age": 2, "kind": 2}).encode_xgboost_leaf_space(evaluation).toarray(),
+        generalization.change_level({"age": 2, "kind": 0}).encode_xgboost_leaf_space(evaluation).toarray(),
     )
 
 
@@ -229,6 +326,14 @@ def test_routing_review_flag_is_strictly_above_one_percent(schema_factory):
     assert stats["review_needed"]
     with pytest.raises(AssertionError, match="exactly once"):
         fitted.routing_stats(fitted.transform_groups(evaluation), len(evaluation) - 1)
+    evaluation["kind"] = "a"
+    evaluation.loc[0, "age"] = 7
+    stats = fitted.routing_stats(fitted.transform_groups(evaluation), len(evaluation))
+    assert stats["widened_record_fraction"] == 0.01 and not stats["review_needed"]
+    evaluation.loc[1, "kind"] = "b"
+    stats = fitted.routing_stats(fitted.transform_groups(evaluation), len(evaluation))
+    assert stats["fallback_fraction"] == stats["widened_record_fraction"] == 0.01
+    assert stats["adjusted_record_fraction"] == 0.02 and stats["review_needed"]
 
 
 def test_categorical_split_requires_every_nonempty_child_to_meet_k(schema_factory):
@@ -328,7 +433,7 @@ def test_pilot_never_scores_test_and_supports_loaders_without_classes(
 
     schema = schema_factory()
     X = pd.DataFrame({
-        "age": list(range(8)) + [2, 3, 100, 100],
+        "age": [0, 0, 1, 1, 4, 4, 5, 5, 2, 7, 100, 100],
         "kind": ["a"] * 12, "aux": range(12),
     })
     # Test-only values and labels deliberately violate the training schema.
@@ -393,11 +498,16 @@ def test_pilot_never_scores_test_and_supports_loaders_without_classes(
     assert rows["test_delta_u"].isna().all()
     assert (rows["validation_leaf_count"] == 2).all()
     assert (rows["validation_fallback_count"] == 0).all()
+    assert (rows["validation_widened_record_count"] == 2).all()
+    assert (rows["validation_root_widened_record_count"] == 1).all()
+    assert (rows["evaluation_routing"] == EVALUATION_ROUTING).all()
     assert rows["test_root_count"].isna().all()
     for release_path in rows["release_path"]:
         diagnostics = json.loads((Path(release_path).parent / "routing_diagnostics.json").read_text(encoding="utf-8"))
         assert diagnostics["test"] is None
+        assert diagnostics["policy"] == EVALUATION_ROUTING
         assert diagnostics["validation"]["leaf_count"] == 2
+        assert diagnostics["validation"]["attribute_widening_counts"] == {"age": 2}
         assert diagnostics["validation"]["eval_coarsest_release_row_count"] == 0
     assert predictions == [2, 2, 2, 2, 2, 2]
     assert not (output_dir / "baseline_long.csv").exists()
@@ -448,6 +558,14 @@ def test_trim_original_and_tail_population_are_the_training_split(schema_factory
     release = json.loads((Path(result.run_dir) / "trim_release.json").read_text())
     assert release["tail_risk_population"] == "training_split"
     assert release["tail_risk_population_size"] == 28
+    assert release["eval_population_size"] == len(split.X_test_raw)
+    assert release["eval_finest_snapshot_row_count"] + release["eval_coarser_snapshot_row_count"] == len(split.X_test_raw)
+    assert release["eval_coarser_snapshot_fraction"] == pytest.approx(
+        release["eval_coarser_snapshot_row_count"] / len(split.X_test_raw),
+    )
+    assert release["eval_coarsest_release_fraction"] == pytest.approx(
+        release["eval_coarsest_release_row_count"] / len(split.X_test_raw),
+    )
 
 
 def test_compressed_shared_tree_roundtrip_and_cache_identity(schema_factory, tmp_path, monkeypatch):
@@ -491,7 +609,9 @@ def test_diagnosis_distinguishes_numeric_gap_from_other_attribute_shrink(schema_
     fitted = FittedMondrian(schema_factory(), k=2, variant="median").fit(X, pd.Series([0, 0, 1, 1]))
     evaluation = pd.DataFrame({"age": [1, 3, 6], "kind": ["a"] * 3, "aux": [0] * 3})
     report = diagnose_routing(fitted, X, evaluation)
-    assert report["exclusive_fallback_causes"] == {"split_numeric_observed_range_gap": 1}
+    assert report["exclusive_legacy_containment_fallback_causes"] == {"split_numeric_observed_range_gap": 1}
+    assert report["validation"]["widened_record_count"] == 1
+    assert report["validation"]["fallback_count"] == 0
     assert report["training"]["fallback_count"] == 0
     assert report["counterfactual_fitting_domain_routing"]["leaf_region_exclusion_count"] == 1
 
@@ -504,7 +624,7 @@ def test_diagnosis_distinguishes_numeric_gap_from_other_attribute_shrink(schema_
     fitted = FittedMondrian(schema, k=2, variant="median").fit(X, pd.Series([0, 1] * 4))
     evaluation = pd.DataFrame({"age": [0], "kind": ["a"], "aux": [7]})
     report = diagnose_routing(fitted, X, evaluation)
-    assert report["exclusive_fallback_causes"] == {"non_split_numeric_observed_range_shrink": 1}
+    assert report["exclusive_legacy_containment_fallback_causes"] == {"non_split_numeric_observed_range_shrink": 1}
     assert report["non_split_numeric_exclusion_counts_nonexclusive"] == {"aux": 1}
 
 
@@ -515,4 +635,4 @@ def test_diagnosis_identifies_unoccupied_categorical_branch(schema_factory):
     fitted = FittedMondrian(schema_factory(), k=2, variant="median").fit(X, pd.Series([0, 1, 0, 1]))
     evaluation = pd.DataFrame({"age": [1], "kind": ["b"], "aux": [0]})
     report = diagnose_routing(fitted, X, evaluation)
-    assert report["exclusive_fallback_causes"] == {"unoccupied_categorical_branch": 1}
+    assert report["exclusive_legacy_containment_fallback_causes"] == {"unoccupied_categorical_branch": 1}

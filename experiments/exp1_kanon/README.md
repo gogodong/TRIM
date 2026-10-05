@@ -19,19 +19,27 @@ categorical ordering, encoding, optimizer, or evaluation protocol.
   A single occupied child is descended without removing records.
 - Every training node stores a region: its categorical hierarchy nodes and
   observed numeric [min, max] ranges, before splitting. Terminal regions are
-  exactly the published training partitions. Split thresholds remain fitting
-  metadata; evaluation routing checks containment in every QI of a child's
-  region. It descends into the unique matching child and stops at the current
-  region when no child contains the whole record.
+  exactly the published training partitions. Evaluation follows fitted numeric
+  thresholds and categorical hierarchy branches, independently of shrinkage
+  in the other QIs' observed ranges.
 - A separate global root stores every QI at its hierarchy root, including
-  numeric QIs. Its only child is the observed training region. This preserves
-  the training release even if K=N_train leaves it unsplit, while records
-  outside the training range can stop at the global root.
-- An empty categorical branch stops at its containing parent. A numeric gap
-  such as 35 between children [30, 34] and [36, 40] stops at their observed
-  parent [30, 40]. The entire record uses the stopped node's region. All
-  training records still reach their own published leaves, and evaluation
-  records do not change the fitted tree, publication or privacy metrics.
+  numeric QIs. All schema-valid evaluation records enter its observed-training
+  child. At a terminal leaf, each QI retains its published value if it contains
+  the true value; otherwise only that QI widens to the deepest containing
+  ancestor region on the fitted path. Different QIs may use different ancestors.
+- A numeric value 35 between siblings [30, 34] and [36, 40] follows their
+  fitted threshold. Its numeric QI widens to the containing parent [30, 40];
+  other fitting QIs retain their leaf values. A value outside the observed
+  training range can use its hierarchy root without coarsening other QIs.
+- An unoccupied categorical branch has no fitted path. Stop the whole record
+  at the nearest ancestor containing every QI. This is normally the branching
+  parent, but an earlier numeric-range mismatch may require an ancestor above
+  it. An unseen numeric missing branch uses the same whole-record rule;
+  occupied numeric/categorical missing branches are followed normally.
+- All training records reach their own published leaves without widening.
+  Evaluation records never change the fitted tree, publication or privacy
+  metrics. A mixed per-QI representation is an evaluation input, not a newly
+  published equivalence class.
 - Values absent from training but present in the fixed hierarchy are supported.
   Nonmissing values outside that schema raise an error; the runner does not
   extend a hierarchy using validation/test observations.
@@ -50,6 +58,21 @@ categorical ordering, encoding, optimizer, or evaluation protocol.
   empirical training-row mean. A range inside a numeric bin can retain finer
   MLP resolution. Matching published hierarchy values have matching inputs.
   The standardizer is fitted once on shared level-0 training inputs.
+
+**Evaluation difference from TRIM:** TRIM matches complete released groups
+and falls back whole records across snapshots. KAnon follows fitted splits
+and widens failing leaf QIs individually. This user-approved evaluation
+convention preserves more detail for KAnon than the previous whole-record
+containment policy. It is not a claim that both methods use an identical test
+transformation, or that preserving detail necessarily improves predictive
+loss. Report the distinction alongside the comparison. TRIM's existing
+`eval_assignment_counts` and `eval_coarsest_release_row_count` are now
+accompanied by `eval_finest_snapshot_row_count`,
+`eval_coarser_snapshot_fraction` and `eval_coarsest_release_fraction` for its
+R64 rerun. The coarser-snapshot fraction includes every row not assigned at
+the finest available snapshot, including final coarsest fallback. Snapshot
+assignments and KAnon leaf widening measure different events and should be
+labeled separately.
 
 Privacy classes use canonical published QI intervals/nodes, not encoded model
 vectors. Two distinct ranges can map to the same XGBoost leaf vector without
@@ -108,11 +131,20 @@ Each K point also writes `routing_diagnostics.json` separately for validation
 and test (test is null in pilot mode). It records mutually exclusive leaf,
 internal-node and global-root counts, fallback count/fraction, per-node
 `eval_assignment_counts`, stop-depth counts and
-`eval_coarsest_release_row_count`. The raw metric rows include the counts,
-fractions and review flags. The configurable `routing_review_threshold`
-defaults to 0.01: strictly more than 1% stopping above a leaf is flagged and
-printed for review at every K. Inspect those flags, especially at small K,
-before trusting the curve. Fallback rarity is measured rather than assumed.
+`eval_coarsest_release_row_count`. Leaf counts include both unmodified leaves
+and leaves with per-QI widening. These are separated by `leaf_unmodified_count`,
+`leaf_widened_count`, `widened_record_fraction`, `widened_qi_count`, per-attribute
+widening counts and ancestor-source depths. `root_widened_record_count` counts
+leaf records with at least one root QI; it is distinct from whole-record root
+fallback. Missing-branch stop reasons and additional whole-record ancestor
+fallbacks are logged too. Raw rows include the scalar counts and fractions.
+The configurable `routing_review_threshold` defaults to 0.01: strictly more
+than 1% needing either whole-record fallback or per-QI widening is flagged
+and printed at every K. A lower whole-record fallback share therefore cannot
+hide persistent range mismatches.
+
+`widened_attribute_count_distribution` also distinguishes widening one QI
+from widening several QIs in the same record.
 
 ## Metrics, artifacts and verification
 
@@ -154,44 +186,49 @@ Every model/K point stores a small `release.json` reference with a relative
 path, checksum and model protocol, plus `metrics.json` and routing diagnostics.
 The shared compressed file retains all training row IDs, partitions, nodes,
 observed regions and provenance. Use `artifacts.load_release_payload(path)`
-to read either a reference, compressed tree or legacy plain JSON. Fitted trees use
-`hierarchy_mondrian.v2`; the previous routing schema is rejected rather than
-silently reinterpreted. Each task stores
+to read either a reference, compressed tree or legacy plain JSON. New fitted
+trees use `hierarchy_mondrian.v3` and save
+`fitted_splits_with_per_qi_ancestor_widening` as their evaluation policy.
+Archived v2 trees replay their original whole-record containment rule; they
+are never silently upgraded. Schema/policy mismatches and v1 trees are rejected.
+Each task stores
 its split IDs, resolved protocol and original-model reference. Sweep manifests
 record completion/failure; `raw_results.jsonl` preserves completed points.
 
 Focused tests are in this repository's `tests/test_kanon_baseline.py`. They
 cover K/coverage, label-dependent splits, zero-gain fallback, categorical
-legality, missing values, numeric-gap/whole-record/root fallback, routing
+legality, missing values, numeric-gap per-QI widening, missing-branch
+whole-record fallback, independent deepest ancestors, routing
 counts, training-leaf invariance and saved-tree reconstruction,
 shared encodings, model-vector collisions, training-only raw K0/P99 in both
 TRIM and KAnon, compressed cache sharing/invalidation, fallback causes and
 Diabetes deduplication. Encoding writes whole attribute blocks and reuses
-representations instead of assigning pandas rows for every partition. Routing
-skips attributes identical to their parent's region; containment semantics are
-unchanged.
+representations instead of assigning pandas rows for every partition.
 Run them explicitly from the repository root:
 
 ```bash
 python -m pytest -q tests/test_kanon_baseline.py
 ```
 
-Verification status (2026-10-05): all 24 focused tests passed. The initial
+Verification status (2026-10-05): all 28 focused tests passed. The initial
 Income pilot was stopped after 72 points; its artifacts remain archived under
-the earlier all-loaded-rows definition. The corrected validation pilot uses
+the earlier all-loaded-rows definition. The training-population pilot was
+stopped after 73 points when the user approved the new evaluation rule; its
+v2 artifacts also remain archived. The restarted validation pilot uses
 both variants, both model families, seeds 42–46 and the complete K grid (360
 points). Its results and the reviewed variant choice are pending. The full
 sweep and historical Table IV rerun
 have not been executed. Local data paths, logs and generated results are
 excluded from the repository.
 
-## Investigated fallback at small K
+## Investigated fallback under the archived containment policy
 
 Income seed 42 has 78,661 training and 16,857 validation rows. At K=2,
 Median has 31,181 partitions and 10,741 validation fallbacks (63.72%);
 InfoGain has 32,554 partitions and 12,446 fallbacks (73.83%). Every training
 row still reaches its original leaf. No validation record reaches the global
-root. The following causes are mutually exclusive counts of validation stops:
+root. These measurements used v2 whole-record containment routing. The
+following causes are mutually exclusive counts of the first validation stop:
 
 | Cause | Median | InfoGain |
 |---|---:|---:|
@@ -216,11 +253,42 @@ Fitting-domain/threshold routing would send 3,414 Median and 3,009 InfoGain
 validation records to leaves whose published regions exclude a true value.
 Those counts come from a diagnostic counterfactual, never model evaluation.
 It would hide some containment failures rather than solve them. The previously
-assumed <1% fallback rate is unsupported at small K. The 1% review flag stays;
-the agreed containment/whole-record policy remains unchanged pending review.
+assumed <1% fallback rate is unsupported at small K. The approved v3 policy
+adds per-QI ancestor widening after split routing instead. Numeric failures
+at the first v2 stop do not imply that a record can reach a leaf: continuing
+the fitted path can reveal a later unoccupied categorical branch.
 
-Reproduce the diagnosis on validation features only, without predicting test
-labels or changing the routing rule:
+## Measured effect of the approved per-QI rule
+
+Using those exact Income seed-42, K=2 trees and the same 16,857 validation
+features, the new policy gives:
+
+| Assignment | Median | InfoGain |
+|---|---:|---:|
+| Original leaf, no widening | 6,116 | 4,411 |
+| Leaf with per-QI widening | 3,414 | 3,009 |
+| Whole-record stop | 7,327 (43.47%) | 9,437 (55.98%) |
+| Extra ancestor fallback after the branching parent excludes a numeric value | 2,701 | 3,539 |
+
+All original leaf assignments remain unchanged. No training record widens,
+no validation representation excludes a true QI value, and no whole record
+uses the global root in these two points. Of the successfully widened leaves,
+2,934/2,566 records widen one QI and 480/443 widen both numeric QIs
+(Median/InfoGain respectively).
+
+The preliminary estimate of roughly 6,100/6,500 successful leaf conversions
+was too high: 2,701/3,539 records whose first containment failure was numeric
+later hit an unoccupied categorical branch. They still need whole-record
+fallback. The new policy reduces whole-record stops without eliminating
+local category sparsity. These feature-only checks establish coverage and
+assignment counts; changes in prediction loss must come from the restarted
+pilot, not from an assumption that more detail improves the model.
+
+Compare both policies on the same saved tree, using validation features only.
+The diagnostic checks training-leaf invariance and true-value coverage, logs
+actual old-to-new transitions and distinguishes later categorical stops from
+successful leaf widening. It never predicts utility or changes the saved
+release's evaluation policy:
 
 ```bash
 python -m experiments.exp1_kanon.diagnose_routing \

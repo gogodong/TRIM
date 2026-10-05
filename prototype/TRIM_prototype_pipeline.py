@@ -977,6 +977,9 @@ def run_trim_pipeline(
             eval_model_parts,
             list(X_eval_raw.index),
         )
+        finest_eval_iteration = int(resolved_snapshots[0][0]["iteration"])
+        finest_eval_row_count = eval_assignment_counts[finest_eval_iteration]
+        coarser_eval_row_count = len(X_eval_raw) - finest_eval_row_count
         return {
             "status": "ok",
             "target_k": target_k,
@@ -1002,6 +1005,12 @@ def run_trim_pipeline(
             "assignment_counts": assignment_counts,
             "eval_assignment_counts": eval_assignment_counts,
             "eval_coarsest_release_row_count": int(coarsest_eval_row_count),
+            "eval_population_size": int(len(X_eval_raw)),
+            "eval_finest_snapshot_iteration": finest_eval_iteration,
+            "eval_finest_snapshot_row_count": int(finest_eval_row_count),
+            "eval_coarser_snapshot_row_count": int(coarser_eval_row_count),
+            "eval_coarser_snapshot_fraction": float(coarser_eval_row_count / len(X_eval_raw)) if len(X_eval_raw) else 0.0,
+            "eval_coarsest_release_fraction": float(coarsest_eval_row_count / len(X_eval_raw)) if len(X_eval_raw) else 0.0,
             "assigned_row_ids": [str(row_id) for row_id in assigned_order],
             "suppressed_row_ids": [str(row_id) for row_id in remaining_ids],
             "row_snapshot_assignments": {

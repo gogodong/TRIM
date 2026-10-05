@@ -20,6 +20,8 @@ from prototype.dataloader import (
 
 
 MISSING_NODE = "__mondrian_missing__"
+EVALUATION_ROUTING = "fitted_splits_with_per_qi_ancestor_widening"
+LEGACY_EVALUATION_ROUTING = "smallest_containing_node_region_all_qis"
 
 
 def _entropy(counts):
@@ -278,6 +280,7 @@ class FittedMondrian:
         if isinstance(k, bool) or int(k) != k or k < 1:
             raise ValueError("k must be a positive integer.")
         self.schema, self.k, self.variant = schema, int(k), variant
+        self.evaluation_routing = EVALUATION_ROUTING
         self.nodes = []
         self.partitions = []
 
@@ -443,7 +446,117 @@ class FittedMondrian:
         return self
 
     def transform_groups(self, X):
-        """Stop at the smallest fitted region containing every true QI value."""
+        """Apply the evaluation policy saved with the fitted release."""
+        if self.evaluation_routing == LEGACY_EVALUATION_ROUTING:
+            return self._transform_groups_containment(X)
+        return self._transform_groups_split_widening(X)
+
+    def _transform_groups_split_widening(self, X):
+        """Follow fitted splits; widen failing leaf QIs on that same path.
+
+        An absent branch stops the whole record at the closest containing
+        ancestor. Evaluation representations never modify published leaves.
+        """
+        if not self.nodes:
+            raise ValueError("Fit Mondrian before transforming evaluation records.")
+        values = self.schema.values(X)
+        attributes = self.schema.attributes
+        groups = []
+        pending = [(0, np.arange(len(X)), (0,))]
+        while pending:
+            node_id, positions, path = pending.pop()
+            if not len(positions):
+                continue
+            node = self.nodes[node_id]
+            if node["kind"] == "leaf":
+                # A source-node tuple identifies the representation shared by
+                # these rows. Resolve each QI independently, deepest first.
+                sources = np.full((len(positions), len(attributes)), -1, dtype=np.intp)
+                for column, attribute in enumerate(attributes):
+                    unresolved = np.ones(len(positions), dtype=bool)
+                    for ancestor_id in reversed(path):
+                        selected = np.flatnonzero(unresolved)
+                        if not len(selected):
+                            break
+                        matches = self.schema.contains(
+                            attribute, self.nodes[ancestor_id]["region"][attribute],
+                            values[attribute][positions[selected]],
+                        )
+                        sources[selected[matches], column] = ancestor_id
+                        unresolved[selected[matches]] = False
+                    if unresolved.any():
+                        raise AssertionError("The hierarchy root must contain every evaluation QI.")
+                signatures, codes = np.unique(sources, axis=0, return_inverse=True)
+                for code, signature in enumerate(signatures):
+                    source_ids = dict(zip(attributes, map(int, signature)))
+                    widened = [attribute for attribute in attributes if source_ids[attribute] != node_id]
+                    groups.append({
+                        "positions": positions[codes == code].tolist(),
+                        "release": {
+                            attribute: self.nodes[source_ids[attribute]]["region"][attribute]
+                            for attribute in attributes
+                        },
+                        "node_id": node_id, "depth": node["depth"],
+                        "stop_kind": "leaf", "fallback": False,
+                        "widened_attributes": widened,
+                        "widening_source_node_ids": {attribute: source_ids[attribute] for attribute in widened},
+                    })
+                continue
+            remaining = np.ones(len(positions), dtype=bool)
+            for child in node["children"]:
+                if node["kind"] == "root":
+                    # The synthetic root is only a final value fallback; all
+                    # schema-valid rows enter the observed training tree.
+                    mask = np.ones(len(positions), dtype=bool)
+                elif node["kind"] == "numeric":
+                    observed = values[node["attribute"]][positions]
+                    if child["side"] == "missing":
+                        mask = np.isnan(observed)
+                    elif child["side"] == "left":
+                        mask = observed <= node["threshold"]
+                    else:
+                        mask = observed > node["threshold"]
+                else:
+                    attribute = node["attribute"]
+                    domain = self.nodes[child["node_id"]]["domain"][attribute]
+                    mask = self.schema.contains(attribute, domain, values[attribute][positions])
+                if np.any(mask & ~remaining):
+                    raise AssertionError("Fitted split branches must not overlap.")
+                remaining &= ~mask
+                if mask.any():
+                    pending.append((child["node_id"], positions[mask], (*path, child["node_id"])))
+            if not remaining.any():
+                continue
+            reason = "unoccupied_categorical_branch" if node["kind"] == "categorical" else "unobserved_numeric_missing_branch"
+            # Earlier threshold routing may have crossed an observed-range
+            # gap. The branching parent then need not contain the whole row.
+            for ancestor_id in reversed(path):
+                selected = np.flatnonzero(remaining)
+                if not len(selected):
+                    break
+                ancestor = self.nodes[ancestor_id]
+                mask = np.ones(len(selected), dtype=bool)
+                for attribute in attributes:
+                    mask &= self.schema.contains(
+                        attribute, ancestor["region"][attribute], values[attribute][positions[selected]],
+                    )
+                if not mask.any():
+                    continue
+                stopped = selected[mask]
+                remaining[stopped] = False
+                groups.append({
+                    "positions": positions[stopped].tolist(), "release": ancestor["region"],
+                    "node_id": ancestor_id, "depth": ancestor["depth"],
+                    "stop_kind": "root" if ancestor_id == 0 else "internal", "fallback": True,
+                    "routing_stop_node_id": node_id, "stop_reason": reason,
+                    "widened_attributes": [], "widening_source_node_ids": {},
+                })
+            if remaining.any():
+                raise AssertionError("A whole-record fallback must contain every true QI value.")
+        return groups
+
+    def _transform_groups_containment(self, X):
+        """Replay the archived v2 whole-record containment policy."""
         if not self.nodes:
             raise ValueError("Fit Mondrian before transforming evaluation records.")
         values = self.schema.values(X)
@@ -483,7 +596,7 @@ class FittedMondrian:
         return groups
 
     def routing_stats(self, groups, population_size, *, review_threshold=0.01):
-        """Counts at terminal leaves, internal regions and the global root."""
+        """Separate whole-record stops from leaves with per-QI widening."""
         if not 0 <= review_threshold <= 1:
             raise ValueError("Routing review threshold must be in [0, 1].")
         positions = [position for group in groups for position in group["positions"]]
@@ -491,20 +604,52 @@ class FittedMondrian:
             raise AssertionError("Evaluation routing must assign each record exactly once.")
         counts = {"leaf": 0, "internal": 0, "root": 0}
         assignment_counts, depth_counts = {}, {}
+        widened_count, widened_qi_count, root_widened_count, ancestor_fallback_count = 0, 0, 0, 0
+        attribute_counts, widening_depth_counts, stop_reasons, widening_width_counts = {}, {}, {}, {}
         for group in groups:
             count = len(group["positions"])
             counts[group["stop_kind"]] += count
             node_id, depth = str(group["node_id"]), str(group["depth"])
             assignment_counts[node_id] = assignment_counts.get(node_id, 0) + count
             depth_counts[depth] = depth_counts.get(depth, 0) + count
+            widened = group.get("widened_attributes", [])
+            widened_count += count if widened else 0
+            widened_qi_count += count * len(widened)
+            if widened:
+                width = str(len(widened))
+                widening_width_counts[width] = widening_width_counts.get(width, 0) + count
+            source_ids = group.get("widening_source_node_ids", {})
+            root_widened_count += count if 0 in source_ids.values() else 0
+            for attribute in widened:
+                attribute_counts[attribute] = attribute_counts.get(attribute, 0) + count
+                source_depth = str(self.nodes[source_ids[attribute]]["depth"])
+                widening_depth_counts[source_depth] = widening_depth_counts.get(source_depth, 0) + count
+            if group["fallback"]:
+                reason = group.get("stop_reason", "legacy_whole_record_containment")
+                stop_reasons[reason] = stop_reasons.get(reason, 0) + count
+                ancestor_fallback_count += count if group.get("routing_stop_node_id", group["node_id"]) != group["node_id"] else 0
         fallback_count = counts["internal"] + counts["root"]
         fraction = fallback_count / population_size if population_size else 0.0
+        widened_fraction = widened_count / population_size if population_size else 0.0
+        adjusted_fraction = fraction + widened_fraction
         return {
             "population_size": population_size,
             "leaf_count": counts["leaf"], "internal_count": counts["internal"],
             "root_count": counts["root"], "fallback_count": fallback_count,
             "fallback_fraction": fraction, "review_threshold": review_threshold,
-            "review_needed": fraction > review_threshold,
+            "leaf_unmodified_count": counts["leaf"] - widened_count,
+            "leaf_widened_count": widened_count,
+            "widened_record_count": widened_count, "widened_record_fraction": widened_fraction,
+            "widened_qi_count": widened_qi_count,
+            "attribute_widening_counts": attribute_counts,
+            "widened_attribute_count_distribution": widening_width_counts,
+            "widening_source_depth_counts": widening_depth_counts,
+            "root_widened_record_count": root_widened_count,
+            "whole_record_stop_reason_counts": stop_reasons,
+            "whole_record_ancestor_fallback_count": ancestor_fallback_count,
+            "adjusted_record_count": fallback_count + widened_count,
+            "adjusted_record_fraction": adjusted_fraction,
+            "review_needed": adjusted_fraction > review_threshold,
             "eval_assignment_counts": assignment_counts,
             "stop_depth_counts": depth_counts,
             "eval_coarsest_release_row_count": counts["root"],
@@ -527,9 +672,10 @@ class FittedMondrian:
 
     def to_dict(self):
         return {
-            "schema_version": "hierarchy_mondrian.v2", "variant": self.variant, "k": self.k,
+            "schema_version": "hierarchy_mondrian.v3" if self.evaluation_routing == EVALUATION_ROUTING else "hierarchy_mondrian.v2",
+            "variant": self.variant, "k": self.k,
             "row_semantics": "every_training_row_once", "suppression": False,
-            "unseen_policy": "smallest_containing_node_region_all_qis",
+            "unseen_policy": self.evaluation_routing,
             "root_region": "all_qis_at_hierarchy_roots",
             "training_row_ids": self.training_ids, "nodes": self.nodes,
             "partitions": self.partitions,
@@ -537,9 +683,14 @@ class FittedMondrian:
 
     @classmethod
     def from_dict(cls, schema, payload):
-        if payload.get("schema_version") != "hierarchy_mondrian.v2":
+        policies = {"hierarchy_mondrian.v2": LEGACY_EVALUATION_ROUTING, "hierarchy_mondrian.v3": EVALUATION_ROUTING}
+        if payload.get("schema_version") not in policies:
             raise ValueError("Unsupported fitted Mondrian schema.")
+        policy = policies[payload["schema_version"]]
+        if payload.get("unseen_policy") != policy:
+            raise ValueError("Fitted Mondrian schema and evaluation policy disagree.")
         fitted = cls(schema, k=payload["k"], variant=payload["variant"])
+        fitted.evaluation_routing = policy
         fitted.nodes = deepcopy(payload["nodes"])
         fitted.partitions = deepcopy(payload["partitions"])
         fitted.training_ids = list(payload["training_row_ids"])

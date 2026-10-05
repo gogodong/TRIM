@@ -5,7 +5,7 @@ results_root: results/exp1_kanon
 # Pilot evaluates both variants on Income validation data, without test losses.
 # Full mode requires --selection and applies one fixed variant to all panels.
 mode: pilot
-# Flag fallback rates above 1% for review, especially at small K.
+# Flag records needing whole-record fallback or per-QI widening above 1%.
 routing_review_threshold: 0.01
 sweep:
   extra_k: [12, 235]

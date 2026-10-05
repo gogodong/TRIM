@@ -1,4 +1,4 @@
-"""Explain validation fallback using a saved tree, without changing routing."""
+"""Compare validation routing policies on one saved training tree."""
 
 from __future__ import annotations
 
@@ -18,14 +18,14 @@ from prototype.dataset_registry import build_data_loader, resolve_generalization
 from prototype.release_artifacts import load_dataset_split
 
 from .artifacts import load_release_payload
-from .mondrian import FittedMondrian, HierarchySchema
+from .mondrian import EVALUATION_ROUTING, FittedMondrian, HierarchySchema
 
 
 def diagnose_routing(fitted, training_frame, evaluation_frame):
-    """Attribute actual stops to missing branches or observed-range exclusions.
+    """Explain archived containment stops and measure split-rule widening.
 
-    Geometric fitting domains are inspected only as a counterfactual diagnostic.
-    They never replace the observed regions in evaluation/model inputs.
+    This comparison inspects validation features only; it never predicts
+    utility or changes the policy saved with the release.
     """
     schema = fitted.schema
     values = schema.values(evaluation_frame)
@@ -33,8 +33,9 @@ def diagnose_routing(fitted, training_frame, evaluation_frame):
         attribute: evaluation_frame[attribute].isin(training_frame[attribute]).to_numpy()
         for attribute in schema.attributes
     }
-    groups = fitted.transform_groups(evaluation_frame)
-    training_groups = fitted.transform_groups(training_frame)
+    groups = fitted._transform_groups_containment(evaluation_frame)
+    widened_groups = fitted._transform_groups_split_widening(evaluation_frame)
+    training_groups = fitted._transform_groups_split_widening(training_frame)
     training_stats = fitted.routing_stats(training_groups, len(training_frame))
     if training_stats["fallback_count"]:
         raise AssertionError("Training records must still reach their published leaves.")
@@ -48,6 +49,7 @@ def diagnose_routing(fitted, training_frame, evaluation_frame):
     causes, excluded_attributes, other_numeric_attributes = Counter(), Counter(), Counter()
     empty_branch_attributes = Counter()
     empty_branch_value_seen_elsewhere_count = 0
+    legacy_cause_by_position = np.full(len(evaluation_frame), "leaf", dtype=object)
     samples, stopped_sizes, stopped_depths = [], [], []
     for group in groups:
         if not group["fallback"]:
@@ -93,6 +95,7 @@ def diagnose_routing(fitted, training_frame, evaluation_frame):
                     raise AssertionError("A stopped record matched the whole child region.")
                 cause = "+".join(sorted(set(reason_list)))
                 causes[cause] += 1
+                legacy_cause_by_position[selected[index]] = cause
                 if len(samples) < 8:
                     position = int(selected[index])
                     samples.append({
@@ -116,15 +119,16 @@ def diagnose_routing(fitted, training_frame, evaluation_frame):
         if unmatched_count:
             if node.get("attribute") not in schema.numeric and node["id"] != 0:
                 causes["unoccupied_categorical_branch"] += unmatched_count
+                legacy_cause_by_position[positions[~matched_domain]] = "unoccupied_categorical_branch"
                 empty_branch_attributes[node["attribute"]] += unmatched_count
                 empty_branch_value_seen_elsewhere_count += int(
                     globally_seen[node["attribute"]][positions[~matched_domain]].sum(),
                 )
             else:
                 causes["unobserved_numeric_missing_branch"] += unmatched_count
+                legacy_cause_by_position[positions[~matched_domain]] = "unobserved_numeric_missing_branch"
 
-    # Demonstrate whether threshold/domain routing would merely hide a true
-    # region mismatch. This diagnostic never trains/scores a different policy.
+    # Demonstrate why split routing alone still needs value widening.
     domain_leaf_count, domain_leaf_exclusions = 0, 0
     pending = [(0, np.arange(len(evaluation_frame)))]
     while pending:
@@ -146,13 +150,48 @@ def diagnose_routing(fitted, training_frame, evaluation_frame):
     routing = fitted.routing_stats(groups, len(evaluation_frame))
     if sum(causes.values()) != routing["fallback_count"]:
         raise AssertionError("Fallback causes must cover every stopped record exactly once.")
+    widened_routing = fitted.routing_stats(widened_groups, len(evaluation_frame))
+    old_fallback = np.zeros(len(evaluation_frame), dtype=bool)
+    for group in groups:
+        old_fallback[group["positions"]] = group["fallback"]
+    transitions, cause_transitions = Counter(), Counter()
+    exclusions = 0
+    for group in widened_groups:
+        positions = np.asarray(group["positions"], dtype=np.intp)
+        if group["fallback"]:
+            outcome = "whole_record_stop"
+        elif group["widened_attributes"]:
+            outcome = "leaf_with_qi_widening"
+        else:
+            outcome = "leaf_without_widening"
+        for was_fallback in (False, True):
+            count = int((old_fallback[positions] == was_fallback).sum())
+            if count:
+                transitions[("old_whole_record_stop" if was_fallback else "old_leaf") + "_to_" + outcome] += count
+        for cause, count in Counter(legacy_cause_by_position[positions]).items():
+            cause_transitions[cause + "_to_" + outcome] += count
+        matches = np.ones(len(positions), dtype=bool)
+        for attribute, domain in group["release"].items():
+            matches &= schema.contains(attribute, domain, values[attribute][positions])
+        exclusions += int((~matches).sum())
+    if exclusions:
+        raise AssertionError("Per-QI widening must never exclude a true value.")
+    if training_stats["widened_record_count"]:
+        raise AssertionError("Training records must not need QI widening.")
     qi = list(schema.attributes)
     seen = pd.MultiIndex.from_frame(evaluation_frame[qi]).isin(pd.MultiIndex.from_frame(training_frame[qi]))
     quantiles = (0, .25, .5, .75, 1)
     return {
         "variant": fitted.variant, "k": fitted.k, "evaluation_split": "validation",
-        "routing_policy_changed": False, "training": training_stats, "validation": routing,
-        "partition_count": len(fitted.partitions), "exclusive_fallback_causes": dict(causes),
+        "saved_evaluation_routing": fitted.evaluation_routing,
+        "training": training_stats,
+        "validation": widened_routing if fitted.evaluation_routing == EVALUATION_ROUTING else routing,
+        "legacy_containment_validation": routing,
+        "split_rule_with_widening_validation": widened_routing,
+        "policy_transition_counts": dict(transitions),
+        "legacy_cause_to_new_outcome_counts": dict(cause_transitions),
+        "split_rule_with_widening_true_value_exclusion_count": exclusions,
+        "partition_count": len(fitted.partitions), "exclusive_legacy_containment_fallback_causes": dict(causes),
         "excluded_attribute_counts_nonexclusive": dict(excluded_attributes),
         "non_split_numeric_exclusion_counts_nonexclusive": dict(other_numeric_attributes),
         "unoccupied_categorical_branch_attribute_counts": dict(empty_branch_attributes),
@@ -205,10 +244,14 @@ def main(argv=None):
     report = diagnose_routing(fitted, split.X_train_raw, split.X_val_raw)
     report.update(release_path=str(Path(args.release).resolve()), tree_sha256=protocol["tree_sha256"])
     write_json(args.output, report)
-    print(json.dumps({key: report[key] for key in (
-        "variant", "k", "exclusive_fallback_causes", "non_split_numeric_exclusion_counts_nonexclusive",
-        "counterfactual_fitting_domain_routing",
-    )}, sort_keys=True), flush=True)
+    print(json.dumps({
+        "variant": report["variant"], "k": report["k"],
+        "policy_transition_counts": report["policy_transition_counts"],
+        "split_rule_with_widening": {key: report["split_rule_with_widening_validation"][key] for key in (
+            "fallback_count", "fallback_fraction", "leaf_count", "widened_record_count",
+            "widened_record_fraction", "attribute_widening_counts", "whole_record_ancestor_fallback_count",
+        )},
+    }, sort_keys=True), flush=True)
     return 0
 
 

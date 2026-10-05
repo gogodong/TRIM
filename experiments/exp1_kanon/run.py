@@ -25,7 +25,7 @@ from prototype.model_factory import build_model_factory
 from prototype.privacy_metrics import individual_tail_risk_stats, original_equivalence_class_sizes
 from prototype.release_artifacts import load_dataset_split
 
-from .mondrian import HierarchySchema
+from .mondrian import EVALUATION_ROUTING, HierarchySchema
 from .artifacts import MondrianReleaseCache
 
 
@@ -126,7 +126,8 @@ def main(argv=None):
         "tail_risk_population": "training_split",
         "original_privacy_population": "training_split",
         "release_storage": "shared_compact_json_gzip_with_per_model_references",
-        "evaluation_routing": "smallest_containing_node_region_all_qis",
+        "evaluation_routing": EVALUATION_ROUTING,
+        "trim_evaluation_difference": "KAnon widens failing leaf QIs individually; TRIM falls back whole records across released snapshots.",
         "routing_review_threshold": routing_review_threshold,
     }
     write_json(experiment_dir / "manifest.json", manifest)
@@ -168,7 +169,7 @@ def main(argv=None):
                     ("nrows", None), ("val_size", 0.15), ("test_size", 0.15),
                 )},
                 "encoding": "shared_leaf_space_with_level_or_shared_mlp_means",
-                "evaluation_routing": "smallest_containing_node_region_all_qis",
+                "evaluation_routing": EVALUATION_ROUTING,
                 "privacy_population": "training_split",
                 "original_privacy_encoding": "raw_qis",
             }
@@ -269,7 +270,7 @@ def main(argv=None):
                         test_groups, len(split.X_test_raw), review_threshold=routing_review_threshold,
                     ) if test_groups is not None else None
                     write_json(point_dir / "routing_diagnostics.json", {
-                        "policy": "smallest_containing_node_region_all_qis",
+                        "policy": EVALUATION_ROUTING,
                         "validation": val_routing, "test": test_routing,
                     })
                     started = time.perf_counter()
@@ -299,9 +300,13 @@ def main(argv=None):
                             for field in (
                                 "leaf_count", "internal_count", "root_count", "fallback_count",
                                 "fallback_fraction", "review_needed",
+                                "leaf_unmodified_count", "leaf_widened_count", "widened_record_count",
+                                "widened_record_fraction", "widened_qi_count", "root_widened_record_count",
+                                "whole_record_ancestor_fallback_count", "adjusted_record_count", "adjusted_record_fraction",
                             )
                         },
                         "routing_review_threshold": routing_review_threshold,
+                        "evaluation_routing": EVALUATION_ROUTING,
                         "partition_seconds": release_reference["partition_seconds"],
                         "tree_cache_hit": release_reference["cache_hit"],
                         "tree_cache_seconds": release_reference["tree_cache_seconds"],
@@ -327,8 +332,9 @@ def main(argv=None):
                     for split_name, routing in [("validation", val_routing), ("test", test_routing)]:
                         if routing is not None and routing["review_needed"]:
                             print(
-                                f'Routing review needed: {split_name} {routing["fallback_fraction"]:.2%} '
-                                f'above leaves (internal={routing["internal_count"]}, root={routing["root_count"]}) '
+                                f'Routing review needed: {split_name} whole-record fallback={routing["fallback_fraction"]:.2%}, '
+                                f'per-QI widening={routing["widened_record_fraction"]:.2%} '
+                                f'(internal={routing["internal_count"]}, root={routing["root_count"]}) '
                                 f'for {task["run_id"]} {variant} K={k}.',
                                 flush=True,
                             )
