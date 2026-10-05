@@ -99,6 +99,7 @@ not.
 | Experiment | Entry point | Configuration | Main raw output |
 |---|---|---|---|
 | Exp-1 privacy--utility | `experiments.exp1_privacy_utility.run` | `exp1_privacy_utility.template.yaml` | `trajectory.jsonl` and per-run `trajectory.csv` |
+| Exp-1 KAnon baseline | `experiments.exp1_kanon.run` | `exp1_kanon.template.yaml` | validation pilot, fitted releases and `baseline_long.csv` |
 | Exp-1 DP comparison | `experiments.exp1_dp.run_exp1_dp` | `exp1_dp.template.yaml` | `raw_results.csv` and paired summaries |
 | Exp-2 attacks | `experiments.exp2_attacks.run_exp2_attacks` | `exp2_attacks.template.yaml` | `results.csv` and per-release details |
 | Exp-3 real-data runtime | `experiments.exp3_runtime.run_real` | `exp3_runtime_real.template.yaml` | `run_summaries.csv` |
@@ -140,10 +141,12 @@ observation-only downstream retraining time is recorded separately from TRIM
 execution time.
 
 Each trajectory row also records `tail_risk_p99`, computed by matching release
-rows to their original row IDs, evaluating
-`log(K_original_i / K_current_i)` for every assigned individual, and then
-taking the 99th percentile. Ratios of aggregate K percentiles are retained only
-as descriptive compatibility fields and are not used as paper tail risk.
+rows to their original row IDs. Released individuals have log risk
+`-log(K_current_i)`; absent individuals have log risk `-infinity`. The
+empirical 99th percentile is taken over every loaded original individual,
+including validation/test individuals absent from the training release.
+Ratios of aggregate K percentiles are descriptive compatibility fields.
+Outputs generated with the previous relative-risk definition require reruns.
 
 ```bash
 python -m experiments.exp1_privacy_utility.run \
@@ -152,6 +155,15 @@ python -m experiments.exp1_privacy_utility.run \
 
 Each sweep writes `run_summaries.csv` and `trajectory.jsonl`; individual TRIM
 runs also contain `trajectory.csv` and `trim_iterations.json`.
+
+The KAnon runner uses the same matrix configuration and shared MLP/XGBoost
+encoders. It compares Median and InfoGain Mondrian in an Income validation
+pilot, records one variant choice, then runs that variant across all panels.
+See [the baseline workflow](experiments/exp1_kanon/README.md).
+
+Diabetes loading now retains only the earliest encounter per patient before
+dropping identifiers or splitting. Historical Diabetes results require reruns;
+the loader records the actual unique-patient count.
 
 ### Exp-1: Differential privacy
 

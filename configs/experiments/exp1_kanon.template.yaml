@@ -1,0 +1,13 @@
+# Read dataset/model/seed/split settings from the same matrix as TRIM.
+experiment_kind: exp1_kanon
+matrix_config: configs/experiments/exp1_privacy_utility.template.yaml
+results_root: results/exp1_kanon
+# Pilot evaluates both variants on Income validation data, without test losses.
+# Full mode requires --selection and applies one fixed variant to all panels.
+mode: pilot
+# Flag fallback rates above 1% for review, especially at small K.
+routing_review_threshold: 0.01
+sweep:
+  extra_k: [12, 235]
+  # Optional explicit list replaces the automatic grid, e.g. [12, 235].
+  k_values: null

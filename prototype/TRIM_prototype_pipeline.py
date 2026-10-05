@@ -63,6 +63,7 @@ try:
     from .greedy_selection import SelectionState, calculate_leakage, _write_action_log
     from .initialization import stratified_sample_row_ids, validate_label_coverage
     from .backend_training import fit_standardizer, PassthroughStandardizer
+    from .privacy_metrics import individual_tail_risk_stats
     from .enumeration_horizontal import (
         build_retention_class_groups,
         build_retention_class_position_index,
@@ -100,6 +101,7 @@ except ImportError:  # pragma: no cover - direct script import compatibility
     from greedy_selection import SelectionState, calculate_leakage, _write_action_log
     from initialization import stratified_sample_row_ids, validate_label_coverage
     from backend_training import fit_standardizer, PassthroughStandardizer
+    from privacy_metrics import individual_tail_risk_stats
     from enumeration_horizontal import (
         build_retention_class_groups,
         build_retention_class_position_index,
@@ -240,38 +242,9 @@ def _per_record_equivalence_class_sizes(encode):
 
 
 def _individual_tail_risk_stats(original_per_record_k, current_encode):
-    """Compute P99_i log(K_original,i / K_current,i) on released rows."""
+    """Compute absolute individual log risk over every loaded original row."""
     current_per_record_k = _per_record_equivalence_class_sizes(current_encode)
-    if current_per_record_k.empty:
-        return {
-            "tail_risk_p99": None,
-            "tail_risk_percentile": 99.0,
-            "tail_risk_population": "assigned_release_rows",
-            "tail_risk_population_size": 0,
-            "tail_risk_semantics": (
-                "P99_i(log(K_original_i / K_current_i))"
-            ),
-        }
-
-    aligned_original_k = original_per_record_k.reindex(current_per_record_k.index)
-    if aligned_original_k.isna().any():
-        missing = aligned_original_k.index[aligned_original_k.isna()].tolist()
-        raise ValueError(
-            "Released rows are missing original equivalence-class sizes: "
-            f"{missing[:10]!r}."
-        )
-    original_values = aligned_original_k.to_numpy(dtype=np.float64, copy=False)
-    current_values = current_per_record_k.to_numpy(dtype=np.float64, copy=False)
-    if np.any(original_values <= 0.0) or np.any(current_values <= 0.0):
-        raise ValueError("Per-person equivalence-class sizes must be positive.")
-    individual_delta_h = np.log(original_values / current_values)
-    return {
-        "tail_risk_p99": float(np.percentile(individual_delta_h, 99)),
-        "tail_risk_percentile": 99.0,
-        "tail_risk_population": "assigned_release_rows",
-        "tail_risk_population_size": int(individual_delta_h.size),
-        "tail_risk_semantics": "P99_i(log(K_original_i / K_current_i))",
-    }
+    return individual_tail_risk_stats(original_per_record_k.index, current_per_record_k)
 
 
 def _empty_leak_distribution_stats():
@@ -2014,9 +1987,10 @@ def run_trim_pipeline(
                 "final_leak_k_p4": leak_k_p4,
                 "final_leak_k_p5": leak_k_p5,
                 "tail_risk_p99": tail_risk_p99,
-                "tail_risk_semantics": (
-                    "P99_i(log(K_original_i / K_current_i))"
-                ),
+                "tail_risk_semantics": final_release_result.get("tail_risk_semantics"),
+                "tail_risk_population": final_release_result.get("tail_risk_population"),
+                "tail_risk_population_size": final_release_result.get("tail_risk_population_size"),
+                "tail_risk_percentile_method": final_release_result.get("tail_risk_percentile_method"),
                 "final_leak_k_95_percentile": final_leak_k_95_percentile,
                 "timings": timings,
             }, default=str, sort_keys=True))
@@ -2035,6 +2009,7 @@ def run_trim_pipeline(
             "generalization_tree_sha256": generalization_tree_sha256,
             "input_data_sha256": input_data_sha256,
             "effective_loaded_row_count": len(X_raw),
+            "preprocessing": getattr(data_loader, "preprocessing_metadata", {}),
             "nrows": nrows, "val_size": val_size, "test_size": test_size,
             "random_state": random_state, "tolerance": tolerance,
             "rank_top_k": rank_top_k,
@@ -2106,7 +2081,10 @@ def run_trim_pipeline(
             "final_leak_k": final_leak_k,
             "final_leak_k_p5": leak_k_p5,
             "tail_risk_p99": tail_risk_p99,
-            "tail_risk_semantics": "P99_i(log(K_original_i / K_current_i))",
+            "tail_risk_semantics": final_release_result.get("tail_risk_semantics"),
+            "tail_risk_population": final_release_result.get("tail_risk_population"),
+            "tail_risk_population_size": final_release_result.get("tail_risk_population_size"),
+            "tail_risk_percentile_method": final_release_result.get("tail_risk_percentile_method"),
             "final_leak_k_95_percentile": final_leak_k_95_percentile,
             "timings": timings,
         }, run_dir / "metrics.json")

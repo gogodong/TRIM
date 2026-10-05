@@ -749,12 +749,32 @@ class DiabetesReadmissionDataLoader(ACSIncomeDataLoader):
         import pandas as pd
 
         csv_path = self._resolve_csv_path()
-        frame = pd.read_csv(csv_path, nrows=nrows, encoding="utf-8-sig")
-        schema_frame = pd.read_csv(
-            csv_path,
-            usecols=list(self.feature_columns),
-            encoding="utf-8-sig",
-        )
+        frame = pd.read_csv(csv_path, encoding="utf-8-sig")
+        identifiers = ["patient_nbr", "encounter_id"]
+        missing_ids = [column for column in identifiers if column not in frame.columns]
+        if missing_ids:
+            raise KeyError(f"Diabetes CSV is missing deduplication identifiers: {missing_ids}")
+        for column in identifiers:
+            frame[column] = pd.to_numeric(frame[column], errors="raise")
+        if frame[identifiers].isna().any().any():
+            raise ValueError("Diabetes patient and encounter IDs must be nonmissing.")
+        input_row_count = len(frame)
+        # Preserve source-row IDs and source order after choosing each patient's
+        # earliest encounter. Apply optional limits only after deduplication.
+        frame = frame.sort_values("encounter_id", kind="stable").drop_duplicates(
+            "patient_nbr", keep="first"
+        ).sort_index()
+        self.preprocessing_metadata = {
+            "policy": "minimum_encounter_id_per_patient",
+            "input_row_count": input_row_count,
+            "unique_patient_count": len(frame),
+            "removed_encounter_count": input_row_count - len(frame),
+        }
+        schema_frame = frame
+        if nrows is not None:
+            if isinstance(nrows, bool) or int(nrows) != nrows or nrows < 1:
+                raise ValueError("nrows must be a positive integer.")
+            frame = frame.iloc[:int(nrows)]
         self.X_raw = self._prepare_features(frame)
         if DIABETES_READMISSION_TARGET_COLUMN not in frame.columns:
             raise KeyError(
@@ -1100,14 +1120,16 @@ class DatasetGeneralization:
                 assignment.dot(group_to_leaf).tocsr()
             )
             if include_generalization_level:
-                if level == 0:
-                    level_block = sparse.csr_matrix(
-                        (row_count, 1), dtype=np.float32
-                    )
-                else:
-                    level_block = sparse.csr_matrix(
-                        np.full((row_count, 1), level, dtype=np.float32)
-                    )
+                # Irregular trees can reach nodes above the requested level.
+                # Describe the actual published node, with missing raw values
+                # left at level zero, consistently with local Mondrian recoding.
+                node_heights = np.asarray([
+                    int(nodes_by_id[target_id].get("height_from_leaf", 0))
+                    for target_id in ordered_target_ids
+                ], dtype=np.float32)
+                row_heights = np.zeros((row_count, 1), dtype=np.float32)
+                row_heights[present_positions, 0] = node_heights[row_group_ids]
+                level_block = sparse.csr_matrix(row_heights)
                 attribute_blocks.append(level_block)
 
         if not attribute_blocks:

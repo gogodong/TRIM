@@ -5,6 +5,7 @@ results/
 figures/
 outputs/
 *.log
+*.local.yaml
 
 # Raw datasets are downloaded by the user and are not stored in the repository.
 data/acs/
