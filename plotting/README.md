@@ -53,9 +53,10 @@ python plotting/plot_exp1_privacy_utility.py \
 test logloss. Omit `--baseline-results` when plotting TRIM alone.
 For the paper's tail-risk panel, use `--y-metric tail_risk_p99` with
 `--y-transform identity`. This field is computed per release as
-`P99_i_in_D(log(1/k_i) if i is released else -infinity)` over every loaded
-original individual. It uses the empirical inverse CDF. Earlier result files
-using relative risk over released rows require reruns.
+`P99_i_in_D(log(1/k_i) if i is released else -infinity)` over D, the training
+split. Validation/test people are excluded. It uses the empirical inverse CDF.
+Earlier result files using relative risk or a population that includes
+validation/test people require recomputation.
 
 The built-in KAnon runner exports `baseline_long.csv` in this schema, with
 one globally selected variant named `KAnon`. It supplies both `min_k` and

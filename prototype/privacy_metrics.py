@@ -1,4 +1,4 @@
-"""Individual disclosure risk on a fixed original population."""
+"""Individual disclosure risk on the training population being minimized."""
 
 from __future__ import annotations
 
@@ -8,11 +8,21 @@ import numpy as np
 import pandas as pd
 
 
+def original_equivalence_class_sizes(training_frame, qi_attributes):
+    """Original K0 classes use raw QIs of D, the training split only."""
+    if training_frame.empty or not training_frame.index.is_unique or not qi_attributes:
+        raise ValueError("Original privacy needs nonempty training rows, unique IDs and QIs.")
+    return training_frame.groupby(
+        list(qi_attributes), sort=False, dropna=False, observed=True,
+    ).transform("size").astype(np.int64)
+
+
 def individual_tail_risk_stats(population_ids, released_per_record_k):
     """P99 of log(1/k_i), with absent individuals assigned log risk -inf.
 
     Use the empirical inverse CDF (rank ceil(.99*N)), avoiding interpolation
-    between finite risk and -inf. Population IDs identify D, not only S.
+    between finite risk and -inf. Population IDs identify D (the training
+    split), not only S. Validation/test individuals never enter this population.
     """
     population = pd.Index(population_ids)
     sizes = pd.Series(released_per_record_k, dtype=np.float64)
@@ -31,7 +41,7 @@ def individual_tail_risk_stats(population_ids, released_per_record_k):
         "tail_risk_p99": p99,
         "tail_risk_percentile": 99.0,
         "tail_risk_percentile_method": "inverted_cdf",
-        "tail_risk_population": "all_loaded_original_rows",
+        "tail_risk_population": "training_split",
         "tail_risk_population_size": len(population),
         "tail_risk_released_population_size": len(sizes),
         "tail_risk_semantics": "P99_i_in_D(log(1/k_i) if i in S else -inf)",

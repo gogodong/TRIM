@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from experiments.exp1_kanon.mondrian import FittedMondrian, HierarchySchema
 from experiments.exp1_kanon.run import k_grid
 from prototype.dataloader import DiabetesReadmissionDataLoader, load_generalization_rules
-from prototype.privacy_metrics import individual_tail_risk_stats
+from prototype.privacy_metrics import individual_tail_risk_stats, original_equivalence_class_sizes
 from prototype.release_artifacts import DatasetSplit
 
 
@@ -287,6 +287,7 @@ def test_tail_risk_includes_removed_individuals_and_handles_all_removed():
     stats = individual_tail_risk_stats(population, retained)
     assert stats["tail_risk_population_size"] == 100
     assert stats["tail_risk_released_population_size"] == 50
+    assert stats["tail_risk_population"] == "training_split"
     assert stats["tail_risk_p99"] == pytest.approx(-np.log(2))
     assert individual_tail_risk_stats(population, pd.Series(dtype=float))["tail_risk_p99"] == -np.inf
     with pytest.raises(ValueError, match="belong"):
@@ -320,9 +321,8 @@ def test_k_grid_keeps_whole_training_endpoint_and_separate_raw_reference():
         k_grid(1000, explicit=[1])
 
 
-@pytest.mark.parametrize("family", ["mlp", "xgboost"])
 def test_pilot_never_scores_test_and_supports_loaders_without_classes(
-    schema_factory, tmp_path, monkeypatch, family,
+    schema_factory, tmp_path, monkeypatch,
 ):
     from experiments.exp1_kanon import run
 
@@ -343,9 +343,11 @@ def test_pilot_never_scores_test_and_supports_loaders_without_classes(
     matrix_path = tmp_path / "matrix.yaml"
     matrix_path.write_text(yaml.safe_dump({
         "experiment_id": "test", "experiment_kind": "exp1_privacy_utility",
-        "base_task": {"dataset": "income", "model_name": family, "device": "cpu",
-                      "model": {"downstream": {"family": family}}},
-        "axes": [{"name": "seed", "values": [
+        "base_task": {"dataset": "income", "device": "cpu"},
+        "axes": [{"name": "model", "values": [
+            {"label": family, "patch": {"model_name": family, "model": {"downstream": {"family": family}}}}
+            for family in ("mlp", "xgboost")
+        ]}, {"name": "seed", "values": [
             {"label": 42, "patch": {"pipeline": {"random_state": 42}}},
         ]}],
     }), encoding="utf-8")
@@ -380,6 +382,13 @@ def test_pilot_never_scores_test_and_supports_loaders_without_classes(
     output_dir = next((tmp_path / "results").iterdir())
     rows = pd.read_csv(output_dir / "raw_results.csv")
     assert set(rows["variant"]) == {"median", "infogain"}
+    assert set(rows["model"]) == {"mlp", "xgboost"}
+    assert len(rows) == 4
+    assert rows["tree_cache_hit"].tolist() == [False, False, True, True]
+    assert len(list((output_dir / "shared_releases").glob("*.json.gz"))) == 2
+    assert (rows["tail_risk_population_size"] == 8).all()
+    assert (rows["tail_risk_population"] == "training_split").all()
+    assert rows.groupby("variant")["shared_release_path"].nunique().eq(1).all()
     assert rows["test_loss"].isna().all()
     assert rows["test_delta_u"].isna().all()
     assert (rows["validation_leaf_count"] == 2).all()
@@ -390,7 +399,120 @@ def test_pilot_never_scores_test_and_supports_loaders_without_classes(
         assert diagnostics["test"] is None
         assert diagnostics["validation"]["leaf_count"] == 2
         assert diagnostics["validation"]["eval_coarsest_release_row_count"] == 0
-    assert predictions == [2, 2, 2]
+    assert predictions == [2, 2, 2, 2, 2, 2]
     assert not (output_dir / "baseline_long.csv").exists()
     with pytest.raises(ValueError, match="requires --selection"):
         run.main(["--config", str(config_path), "--mode", "full"])
+
+
+def test_original_privacy_uses_training_raw_qis_not_holdout_or_model_bins(schema_factory):
+    training = pd.DataFrame({"age": [0, 0, 1, 1], "kind": ["a"] * 4, "aux": range(4)})
+    all_rows = pd.concat([training, training], ignore_index=True)
+    schema = schema_factory(["0 ~ 7"])
+    sizes = original_equivalence_class_sizes(training, schema.attributes)
+    assert sizes.tolist() == [2, 2, 2, 2]
+    assert original_equivalence_class_sizes(all_rows, schema.attributes).min() == 4
+    # Model level-0 bins intentionally merge numeric values that raw QIs keep separate.
+    assert len(schema.generalization.encode(training).drop(columns="aux").drop_duplicates()) == 1
+    stats = individual_tail_risk_stats(training.index, sizes)
+    assert stats["tail_risk_population_size"] == 4
+    assert stats["tail_risk_p99"] == pytest.approx(-np.log(2))
+
+
+def test_trim_original_and_tail_population_are_the_training_split(schema_factory, tmp_path):
+    from prototype.TRIM_prototype_pipeline import run_trim_pipeline
+    from prototype.release_artifacts import load_dataset_split
+
+    schema = schema_factory(["0 ~ 3", "4 ~ 7"])
+    loader = schema.loader
+    X = pd.DataFrame({"age": np.repeat(range(4), 10), "kind": ["a"] * 40, "aux": range(40)})
+    y = pd.Series([0, 1] * 20)
+    loader.load = lambda nrows=None: (X.copy(), y.copy())
+    tree_path = tmp_path / "tree.yaml"
+    tree_path.write_text(yaml.safe_dump({"trees": schema.generalization.trees}))
+    split = load_dataset_split(loader, {"random_state": 42})
+    expected = original_equivalence_class_sizes(split.X_train_raw, loader.qi_attributes)
+    previous_threads = torch.get_num_threads()
+    torch.set_num_threads(1)
+    try:
+        result = run_trim_pipeline(
+            loader, tree_path, device="cpu", model_max_iter=2,
+            max_iterations=1, initial_sample_size=4, results_dir=tmp_path / "trim",
+        )
+    finally:
+        torch.set_num_threads(previous_threads)
+    assert result.original_leak_k == expected.min()
+    config = json.loads((Path(result.run_dir) / "config.json").read_text())
+    assert config["privacy_population"] == "training_split"
+    assert config["privacy_population_size"] == len(split.X_train_raw) == 28
+    release = json.loads((Path(result.run_dir) / "trim_release.json").read_text())
+    assert release["tail_risk_population"] == "training_split"
+    assert release["tail_risk_population_size"] == 28
+
+
+def test_compressed_shared_tree_roundtrip_and_cache_identity(schema_factory, tmp_path, monkeypatch):
+    from experiments.exp1_kanon.artifacts import MondrianReleaseCache, load_release_payload
+
+    schema = schema_factory()
+    X = pd.DataFrame({"age": range(8), "kind": ["a"] * 8, "aux": range(8)})
+    y = pd.Series([0, 1] * 4)
+    identity = {"dataset": "toy", "seed": 42, "variant": "median", "k": 2,
+                "training_data_sha256": "train-v1", "tree_sha256": "tree-v1", "implementation_sha256": "code-v1"}
+    cache = MondrianReleaseCache(tmp_path / "cache")
+    fitted, reference = cache.get_or_fit(schema, X, y, identity=identity)
+    assert not reference["cache_hit"]
+    assert Path(reference["shared_release_path"]).read_bytes().startswith(b"\x1f\x8b")
+    def fail_fit(*args, **kwargs):
+        raise AssertionError("A second model must reuse the fitted tree.")
+    monkeypatch.setattr(FittedMondrian, "fit", fail_fit)
+    reused, second = cache.get_or_fit(schema, X, y, identity=identity)
+    assert second["cache_hit"] and second["partition_seconds"] == 0
+    assert reused.to_dict() == fitted.to_dict()
+    for family in ("mlp", "xgboost"):
+        np.testing.assert_allclose(schema.encode(X, reused.partitions, family=family),
+                                   schema.encode(X, fitted.partitions, family=family))
+    reference_path = tmp_path / "release.json"
+    reference_path.write_text(json.dumps(reference))
+    assert load_release_payload(reference_path)["training_row_ids"] == X.index.tolist()
+    reference["shared_release_sha256"] = "wrong"
+    reference_path.write_text(json.dumps(reference))
+    with pytest.raises(ValueError, match="checksum"):
+        load_release_payload(reference_path)
+    for field in ("seed", "training_data_sha256", "tree_sha256", "implementation_sha256"):
+        changed = {**identity, field: "changed"}
+        with pytest.raises(AssertionError, match="reuse"):
+            cache.get_or_fit(schema, X, y, identity=changed)
+
+
+def test_diagnosis_distinguishes_numeric_gap_from_other_attribute_shrink(schema_factory):
+    from experiments.exp1_kanon.diagnose_routing import diagnose_routing
+
+    X = pd.DataFrame({"age": [0, 2, 5, 7], "kind": ["a"] * 4, "aux": range(4)})
+    fitted = FittedMondrian(schema_factory(), k=2, variant="median").fit(X, pd.Series([0, 0, 1, 1]))
+    evaluation = pd.DataFrame({"age": [1, 3, 6], "kind": ["a"] * 3, "aux": [0] * 3})
+    report = diagnose_routing(fitted, X, evaluation)
+    assert report["exclusive_fallback_causes"] == {"split_numeric_observed_range_gap": 1}
+    assert report["training"]["fallback_count"] == 0
+    assert report["counterfactual_fitting_domain_routing"]["leaf_region_exclusion_count"] == 1
+
+    schema = schema_factory()
+    schema.loader.qi_attributes = ("age", "kind", "aux")
+    trees = deepcopy(schema.generalization.trees)
+    trees["aux"] = deepcopy(trees["age"])
+    schema = HierarchySchema(load_generalization_rules(trees, schema.loader, generalization_level=0))
+    X = pd.DataFrame({"age": range(8), "kind": ["a"] * 8, "aux": range(8)})
+    fitted = FittedMondrian(schema, k=2, variant="median").fit(X, pd.Series([0, 1] * 4))
+    evaluation = pd.DataFrame({"age": [0], "kind": ["a"], "aux": [7]})
+    report = diagnose_routing(fitted, X, evaluation)
+    assert report["exclusive_fallback_causes"] == {"non_split_numeric_observed_range_shrink": 1}
+    assert report["non_split_numeric_exclusion_counts_nonexclusive"] == {"aux": 1}
+
+
+def test_diagnosis_identifies_unoccupied_categorical_branch(schema_factory):
+    from experiments.exp1_kanon.diagnose_routing import diagnose_routing
+
+    X = pd.DataFrame({"age": [1] * 4, "kind": ["a"] * 4, "aux": [0] * 4})
+    fitted = FittedMondrian(schema_factory(), k=2, variant="median").fit(X, pd.Series([0, 1, 0, 1]))
+    evaluation = pd.DataFrame({"age": [1], "kind": ["b"], "aux": [0]})
+    report = diagnose_routing(fitted, X, evaluation)
+    assert report["exclusive_fallback_causes"] == {"unoccupied_categorical_branch": 1}

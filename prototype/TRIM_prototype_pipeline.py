@@ -63,7 +63,7 @@ try:
     from .greedy_selection import SelectionState, calculate_leakage, _write_action_log
     from .initialization import stratified_sample_row_ids, validate_label_coverage
     from .backend_training import fit_standardizer, PassthroughStandardizer
-    from .privacy_metrics import individual_tail_risk_stats
+    from .privacy_metrics import individual_tail_risk_stats, original_equivalence_class_sizes
     from .enumeration_horizontal import (
         build_retention_class_groups,
         build_retention_class_position_index,
@@ -101,7 +101,7 @@ except ImportError:  # pragma: no cover - direct script import compatibility
     from greedy_selection import SelectionState, calculate_leakage, _write_action_log
     from initialization import stratified_sample_row_ids, validate_label_coverage
     from backend_training import fit_standardizer, PassthroughStandardizer
-    from privacy_metrics import individual_tail_risk_stats
+    from privacy_metrics import individual_tail_risk_stats, original_equivalence_class_sizes
     from enumeration_horizontal import (
         build_retention_class_groups,
         build_retention_class_position_index,
@@ -242,7 +242,7 @@ def _per_record_equivalence_class_sizes(encode):
 
 
 def _individual_tail_risk_stats(original_per_record_k, current_encode):
-    """Compute absolute individual log risk over every loaded original row."""
+    """Compute absolute individual log risk over D, the training split."""
     current_per_record_k = _per_record_equivalence_class_sizes(current_encode)
     return individual_tail_risk_stats(original_per_record_k.index, current_per_record_k)
 
@@ -699,22 +699,20 @@ def run_trim_pipeline(
     )
     initial_generalization_train_encode = swap_encode_cache.encoded
 
-    # --- Original dataset leak. ---------------------------------------------
-    original_dataset_encode = original_generalization.encode(X_raw)
-    original_privacy_encode = select_encoded_attributes(
-        original_dataset_encode,
-        qi_attributes,
-    )
-    original_leak_stats = _leak_distribution_stats(original_privacy_encode)
+    # D is the training split being minimized. Original privacy uses its raw
+    # QIs; level-0 model bins must not merge original privacy classes.
+    original_dataset_encode = train_original_encode
+    original_per_record_k = original_equivalence_class_sizes(X_train_raw, qi_attributes)
+    original_group_sizes = X_train_raw.loc[:, list(qi_attributes)].value_counts(
+        sort=False, dropna=False,
+    ).to_numpy()
+    original_leak_stats = _leak_distribution_stats_from_group_sizes(original_group_sizes)
     original_leak_k = original_leak_stats["leak_k"]
     original_leak_k_p1 = original_leak_stats["leak_k_p1"]
     original_leak_k_p2 = original_leak_stats["leak_k_p2"]
     original_leak_k_p3 = original_leak_stats["leak_k_p3"]
     original_leak_k_p4 = original_leak_stats["leak_k_p4"]
     original_leak_k_p5 = original_leak_stats["leak_k_p5"]
-    original_per_record_k = _per_record_equivalence_class_sizes(
-        original_privacy_encode
-    )
     # Optional per-iteration downstream test retrains are experiment
     # observations, not part of the TRIM algorithm timings.
     total_curve_metric_time = 0.0
@@ -2009,6 +2007,8 @@ def run_trim_pipeline(
             "generalization_tree_sha256": generalization_tree_sha256,
             "input_data_sha256": input_data_sha256,
             "effective_loaded_row_count": len(X_raw),
+            "privacy_population": "training_split",
+            "privacy_population_size": len(X_train_raw),
             "preprocessing": getattr(data_loader, "preprocessing_metadata", {}),
             "nrows": nrows, "val_size": val_size, "test_size": test_size,
             "random_state": random_state, "tolerance": tolerance,

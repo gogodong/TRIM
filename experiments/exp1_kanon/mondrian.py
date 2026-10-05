@@ -45,6 +45,7 @@ class HierarchySchema:
         self.roots = {}
         self.leaf_values = {}
         self.lookup = {}
+        self.categorical_membership = {}
         for attribute in self.attributes:
             node_list = generalization.trees[attribute]["nodes"]
             nodes = {node["id"]: node for node in node_list}
@@ -105,6 +106,11 @@ class HierarchySchema:
                     raise ValueError(f"{attribute}: duplicate categorical leaves.")
                 self.leaf_values[attribute] = values
                 self.lookup[attribute] = {value: position for position, value in enumerate(values)}
+                self.categorical_membership[attribute] = {}
+                for node_id, positions in descendants.items():
+                    membership = np.zeros(len(leaves), dtype=bool)
+                    membership[positions] = True
+                    self.categorical_membership[attribute][node_id] = membership
 
     def values(self, X):
         """Return numeric values or categorical leaf positions; missing is -1."""
@@ -154,7 +160,7 @@ class HierarchySchema:
             )
         if domain["node"] == MISSING_NODE:
             return values == -1
-        return np.isin(values, self.descendants[attribute][domain["node"]]) | (
+        return self.categorical_membership[attribute][domain["node"]][np.maximum(values, 0)] & (values >= 0) | (
             (values == -1) & domain.get("missing", False)
         )
 
@@ -190,23 +196,39 @@ class HierarchySchema:
 
     def encode(self, X, groups, *, family):
         """Replace QI blocks in the existing level-0 schema; retain non-QIs."""
+        rows_by_group = [np.asarray(group["positions"], dtype=np.intp) for group in groups]
         if family == "mlp":
             encoded = self.generalization.encode(X).copy()
-            for group in groups:
-                row_ids = X.index.take(group["positions"])
-                for attribute, domain in group["release"].items():
+            for attribute in self.attributes:
+                codes = np.empty(len(X), dtype=np.intp)
+                representations, lookup = [], {}
+                for group, rows in zip(groups, rows_by_group):
+                    domain = group["release"][attribute]
+                    key = tuple(sorted(domain.items()))
+                    if key in lookup:
+                        codes[rows] = lookup[key]
+                        continue
+                    lookup[key] = len(representations)
+                    codes[rows] = lookup[key]
                     if attribute in self.numeric:
                         mean, _, _ = self.numeric_representation(attribute, domain)
-                        encoded.loc[row_ids, attribute] = mean
+                        representations.append(mean)
                     else:
                         categories = self.loader.category_maps[attribute]
-                        columns = [f"{attribute}={value}" for value in categories]
                         vector = np.zeros(len(categories), dtype=np.float64)
                         if domain["node"] != MISSING_NODE:
                             positions = self.descendants[attribute][domain["node"]]
                             for position in positions:
                                 vector[categories[self.leaf_values[attribute][position]]] = 1.0 / len(positions)
-                        encoded.loc[row_ids, columns] = vector
+                        representations.append(vector)
+                if not len(X):
+                    continue
+                values = np.asarray(representations, dtype=np.float64)[codes]
+                if attribute in self.numeric:
+                    encoded[attribute] = values
+                else:
+                    columns = [f"{attribute}={value}" for value in self.loader.category_maps[attribute]]
+                    encoded.loc[:, columns] = values
             return encoded
         if family != "xgboost":
             raise ValueError("Mondrian supports the shared mlp and xgboost encodings.")
@@ -217,9 +239,16 @@ class HierarchySchema:
                 offset += 1 if attribute in self.loader.numeric_attributes else len(self.loader.category_maps[attribute])
                 continue
             width = len(self.leaves[attribute])
-            for group in groups:
-                rows = np.asarray(group["positions"], dtype=np.intp)
+            codes = np.empty(len(X), dtype=np.intp)
+            representations, lookup = [], {}
+            for group, rows in zip(groups, rows_by_group):
                 domain = group["release"][attribute]
+                key = tuple(sorted(domain.items()))
+                if key in lookup:
+                    codes[rows] = lookup[key]
+                    continue
+                lookup[key] = len(representations)
+                codes[rows] = lookup[key]
                 if attribute in self.numeric:
                     _, positions, level = self.numeric_representation(attribute, domain)
                 elif domain["node"] == MISSING_NODE:
@@ -227,10 +256,13 @@ class HierarchySchema:
                 else:
                     positions = self.descendants[attribute][domain["node"]]
                     level = int(self.nodes[attribute][domain["node"]]["height_from_leaf"])
-                encoded[np.ix_(rows, np.arange(offset, offset + width + 1))] = 0.0
+                vector = np.zeros(width + 1, dtype=np.float32)
                 if positions:
-                    encoded[np.ix_(rows, offset + np.asarray(positions))] = 1.0 / len(positions)
-                encoded[rows, offset + width] = level
+                    vector[positions] = 1.0 / len(positions)
+                vector[width] = level
+                representations.append(vector)
+            if len(X):
+                encoded[:, offset:offset + width + 1] = np.asarray(representations)[codes]
             offset += width + 1
         if offset != encoded.shape[1]:
             raise AssertionError("Shared XGBoost schema width changed.")
@@ -427,6 +459,10 @@ class FittedMondrian:
                 child_region = self.nodes[child["node_id"]]["region"]
                 mask = np.ones(len(positions), dtype=bool)
                 for attribute, published_value in child_region.items():
+                    # Pending records already belong to the parent region.
+                    # Unchanged attributes therefore need no repeated check.
+                    if published_value == node["region"][attribute]:
+                        continue
                     mask &= self.schema.contains(attribute, published_value, values[attribute][positions])
                 if np.any(mask & ~remaining):
                     raise AssertionError("Sibling Mondrian regions must not overlap.")

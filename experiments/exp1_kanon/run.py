@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import time
 
@@ -21,10 +22,11 @@ from prototype.dataloader import load_generalization_rules_from_file
 from prototype.dataset_registry import build_data_loader, resolve_dataset, resolve_generalization_tree
 from prototype.gpu_math import classification_log_loss_tensor, to_device_tensor
 from prototype.model_factory import build_model_factory
-from prototype.privacy_metrics import individual_tail_risk_stats
+from prototype.privacy_metrics import individual_tail_risk_stats, original_equivalence_class_sizes
 from prototype.release_artifacts import load_dataset_split
 
-from .mondrian import FittedMondrian, HierarchySchema
+from .mondrian import HierarchySchema
+from .artifacts import MondrianReleaseCache
 
 
 def k_grid(n_train, *, extras=(12, 235), explicit=None):
@@ -48,11 +50,11 @@ def k_grid(n_train, *, extras=(12, 235), explicit=None):
 def implementation_sha256():
     """Invalidate pilot decisions if the anonymizer or shared protocol changes."""
     from prototype import backend_training, dataloader, gpu_math, gpu_mlp, gpu_xgboost, model_factory, privacy_metrics, release_artifacts
-    from . import mondrian
+    from . import artifacts, mondrian
 
     digest = hashlib.sha256()
     digest.update(Path(__file__).read_bytes())
-    for module in (mondrian, backend_training, dataloader, gpu_math, gpu_mlp, gpu_xgboost, model_factory, privacy_metrics, release_artifacts):
+    for module in (artifacts, mondrian, backend_training, dataloader, gpu_math, gpu_mlp, gpu_xgboost, model_factory, privacy_metrics, release_artifacts):
         digest.update(Path(module.__file__).read_bytes())
     return digest.hexdigest()
 
@@ -121,11 +123,14 @@ def main(argv=None):
         "configuration": config, "matrix_configuration": matrix_config,
         "implementation_sha256": code_hash, "variants": variants,
         "selection": selection, "tasks": tasks, "income_protocol_signatures": [],
-        "tail_risk_population": "all_loaded_original_rows",
+        "tail_risk_population": "training_split",
+        "original_privacy_population": "training_split",
+        "release_storage": "shared_compact_json_gzip_with_per_model_references",
         "evaluation_routing": "smallest_containing_node_region_all_qis",
         "routing_review_threshold": routing_review_threshold,
     }
     write_json(experiment_dir / "manifest.json", manifest)
+    tree_cache = MondrianReleaseCache(experiment_dir / "shared_releases")
     raw_rows, plot_rows = [], []
     try:
         for task in tasks:
@@ -151,6 +156,7 @@ def main(argv=None):
             generalization = load_generalization_rules_from_file(tree_path, loader, generalization_level=0)
             schema = HierarchySchema(generalization)
             input_hash = _loaded_input_sha256(original_X, original_y)
+            training_hash = _loaded_input_sha256(split.X_train_raw, split.y_train)
             model_spec = dict(task["model"]["downstream"])
             if model_spec.get("warm_start"):
                 raise ValueError("Every K point must train a fresh model; warm_start must be false.")
@@ -163,6 +169,8 @@ def main(argv=None):
                 )},
                 "encoding": "shared_leaf_space_with_level_or_shared_mlp_means",
                 "evaluation_routing": "smallest_containing_node_region_all_qis",
+                "privacy_population": "training_split",
+                "original_privacy_encoding": "raw_qis",
             }
             signature = hashlib.sha256(json.dumps(protocol, sort_keys=True).encode()).hexdigest()
             if dataset == "income":
@@ -180,9 +188,9 @@ def main(argv=None):
                 "test_row_ids": split.X_test_raw.index.tolist(),
             }
             write_json(task_dir / "config.json", task_manifest)
-            original_sizes = original_X.groupby(list(loader.qi_attributes), sort=False, dropna=False, observed=True).transform("size")
+            original_sizes = original_equivalence_class_sizes(split.X_train_raw, loader.qi_attributes)
             original_k = int(original_sizes.min())
-            original_tail = individual_tail_risk_stats(original_X.index, original_sizes)["tail_risk_p99"]
+            original_tail = individual_tail_risk_stats(split.X_train_raw.index, original_sizes)["tail_risk_p99"]
             level0_train = generalization.encode(split.X_train_raw)
             standardizer = fit_standardizer(level0_train, loader)
             # Match TRIM's tensor dtype before standardization for MLP.
@@ -229,6 +237,7 @@ def main(argv=None):
             write_json(task_dir / "reference.json", {
                 **reference, "original_leak_k": original_k, "original_tail_risk_p99": original_tail,
                 "train_size": len(split.X_train_raw), "loaded_size": len(original_X),
+                "privacy_population": "training_split", "privacy_population_size": len(split.X_train_raw),
                 "standardizer_mean": getattr(standardizer, "mean", np.array([])).tolist(),
                 "standardizer_std": getattr(standardizer, "std", np.array([])).tolist(),
             })
@@ -236,16 +245,21 @@ def main(argv=None):
             ks = k_grid(len(split.X_train_raw), extras=sweep.get("extra_k", [12, 235]), explicit=args.k or sweep.get("k_values"))
             for variant in variants:
                 for k in ks:
-                    started = time.perf_counter()
-                    fitted = FittedMondrian(schema, k=k, variant=variant).fit(split.X_train_raw, split.y_train)
-                    partition_seconds = time.perf_counter() - started
+                    fitted, release_reference = tree_cache.get_or_fit(
+                        schema, split.X_train_raw, split.y_train, identity={
+                            "dataset": dataset, "seed": seed, "variant": variant, "k": k,
+                            "training_data_sha256": training_hash, "tree_sha256": tree_hash,
+                            "implementation_sha256": code_hash,
+                        },
+                    )
                     point_dir = task_dir / variant / f"k_{k}"
                     write_json(point_dir / "release.json", {
-                        **fitted.to_dict(), "protocol_sha256": signature,
+                        **release_reference, "protocol_sha256": signature,
+                        "shared_release_path": os.path.relpath(release_reference["shared_release_path"], point_dir),
                         "tree_sha256": tree_hash, "loaded_input_sha256": input_hash,
                     })
                     sizes = fitted.per_record_k(split.X_train_raw.index)
-                    tail = individual_tail_risk_stats(original_X.index, sizes)
+                    tail = individual_tail_risk_stats(split.X_train_raw.index, sizes)
                     val_groups = fitted.transform_groups(split.X_val_raw)
                     test_groups = fitted.transform_groups(split.X_test_raw) if mode == "full" else None
                     val_routing = fitted.routing_stats(
@@ -288,7 +302,12 @@ def main(argv=None):
                             )
                         },
                         "routing_review_threshold": routing_review_threshold,
-                        "partition_seconds": partition_seconds,
+                        "partition_seconds": release_reference["partition_seconds"],
+                        "tree_cache_hit": release_reference["cache_hit"],
+                        "tree_cache_seconds": release_reference["tree_cache_seconds"],
+                        "original_partition_seconds": release_reference["original_partition_seconds"],
+                        "shared_release_bytes": release_reference["shared_release_bytes"],
+                        "shared_release_path": release_reference["shared_release_path"],
                         "model_evaluation_seconds": time.perf_counter() - started,
                         "protocol_sha256": signature, "release_path": str(point_dir / "release.json"),
                     }

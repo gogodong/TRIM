@@ -143,10 +143,13 @@ execution time.
 Each trajectory row also records `tail_risk_p99`, computed by matching release
 rows to their original row IDs. Released individuals have log risk
 `-log(K_current_i)`; absent individuals have log risk `-infinity`. The
-empirical 99th percentile is taken over every loaded original individual,
-including validation/test individuals absent from the training release.
+empirical 99th percentile is taken over D, the training split being minimized.
+Validation/test individuals are excluded; only training individuals actually
+absent from the release receive zero risk. Original K0 also uses raw training
+QIs, independently of level-0 model bins.
 Ratios of aggregate K percentiles are descriptive compatibility fields.
-Outputs generated with the previous relative-risk definition require reruns.
+Outputs using relative risk or including validation/test people in D require
+recomputation under this definition.
 
 ```bash
 python -m experiments.exp1_privacy_utility.run \
